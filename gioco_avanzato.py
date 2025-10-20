@@ -972,7 +972,7 @@ class Game:
         
         # SCHERMO 1400x800
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption("Axis & Allies 1942 - ALLEANZE MONDIALI")
+        pygame.display.set_caption("GreatWar3 - Gioco di Guerra Strategico")
         self.clock = pygame.time.Clock()
         self.fullscreen = False
         
@@ -1040,7 +1040,7 @@ class Game:
         self.voice = VoiceAnnouncer()
         
         print("="*70)
-        print("AXIS & ALLIES 1942 - ALLEANZE MONDIALI")
+        print("GREATWAR3 - GIOCO DI GUERRA STRATEGICO")
         print("="*70)
         print("TU controlli: USA")
         print("PC controlla: EUROPA, RUSSIA, CINA, AFRICA")
