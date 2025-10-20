@@ -8,7 +8,6 @@ RELEASE v1.1:
 2. Titolo: "GreatWar3 v1.1 - Rebranding Completo"
 3. Descrizione (copia e incolla):
 
-```markdown
 # 🎮 GreatWar3 v1.1 - Rebranding Completo
 
 ## 🔄 Modifiche Principali
@@ -27,14 +26,13 @@ RELEASE v1.1:
 - Commenti vocali durante il gioco
 
 ## 🚀 Come Giocare
-1. Installa le dipendenze: `pip install -r requirements.txt`
-2. Avvia il gioco: esegui `AVVIA_GIOCO.bat` o `python gioco_avanzato.py`
+1. Installa le dipendenze: pip install -r requirements.txt
+2. Avvia il gioco: esegui AVVIA_GIOCO.bat o python gioco_avanzato.py
 
 ## 🛡️ Sicurezza Legale
 Questo gioco è completamente originale e non viola alcun copyright.
 
 Buona guerra strategica! ⚔️🗺️
-```
 
 RINOMINARE REPOSITORY:
 ---------------------
