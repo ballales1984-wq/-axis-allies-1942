@@ -60,11 +60,11 @@ def show_main_menu():
         screen.fill((20, 30, 50))
         
         # Titolo
-        title = font_title.render("GREATWAR3", True, (255, 255, 100))
+        title = font_title.render("AXIS & ALLIES 1942", True, (255, 255, 100))
         title_rect = title.get_rect(center=(400, 80))
         screen.blit(title, title_rect)
         
-        subtitle = font_small.render("Gioco di Guerra Strategico", True, (200, 200, 200))
+        subtitle = font_small.render("Alleanze Mondiali", True, (200, 200, 200))
         subtitle_rect = subtitle.get_rect(center=(400, 140))
         screen.blit(subtitle, subtitle_rect)
         

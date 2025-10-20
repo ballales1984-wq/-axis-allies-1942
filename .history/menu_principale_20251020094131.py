@@ -64,7 +64,7 @@ def show_main_menu():
         title_rect = title.get_rect(center=(400, 80))
         screen.blit(title, title_rect)
         
-        subtitle = font_small.render("Gioco di Guerra Strategico", True, (200, 200, 200))
+        subtitle = font_small.render("Alleanze Mondiali", True, (200, 200, 200))
         subtitle_rect = subtitle.get_rect(center=(400, 140))
         screen.blit(subtitle, subtitle_rect)
         
