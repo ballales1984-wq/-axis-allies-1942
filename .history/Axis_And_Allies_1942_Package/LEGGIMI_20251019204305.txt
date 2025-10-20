@@ -1,0 +1,154 @@
+============================================
+AXIS & ALLIES 1942 - ALLEANZE MONDIALI
+============================================
+
+BENVENUTO! 
+
+Grazie per aver scaricato questo gioco!
+
+============================================
+COME GIOCARE:
+============================================
+
+1. Doppio click su "Axis_And_Allies_1942.exe"
+2. Aspetta che si apra la finestra di gioco
+3. Si apre la Console di Comando
+4. Click "INIZIA TURNO" o premi SPAZIO
+5. Conquista il mondo!
+
+============================================
+CONTROLLI:
+============================================
+
+Click territorio    = Apre armeria
+A                   = Attacco
+I                   = Info territorio  
+SPAZIO              = Fine turno
+ESC                 = Chiudi menu/console
+N                   = Bomba atomica (se hai $10,000)
+
+Nel menu armeria:
+- Click pulsanti per comprare
+- R = Ripara unita
+- Trascina barra titolo per muovere menu
+
+============================================
+OBIETTIVO:
+============================================
+
+Conquista il mondo controllando tutti i territori!
+
+- Gestisci 3 risorse (Soldi, Petrolio, Tecnologia)
+- Costruisci 3 tipi di unita (Fanteria, Carri, Aerei)
+- Sviluppa territori per sbloccare MISSILI
+- Raggiungi livello 8 sviluppo per attacchi a distanza!
+
+============================================
+PORTATE UNITA:
+============================================
+
+Fanteria (F)     = 100 pixel (solo vicinissimi)
+Carro Armato (C) = 200 pixel (stati confinanti)
+Aereo (A)        = 500 pixel (lungo raggio!)
+Missili (Liv 8+) = ILLIMITATO
+
+============================================
+SVILUPPO TERRITORI:
+============================================
+
+Ogni 2 turni che mantieni un territorio:
+- Aumenta 1 livello (max 10)
+- Produzione aumenta
+- Raggio attacco aumenta
+- A livello 8 = MISSILI sbloccati!
+
+Se perdi il territorio = Reset a 0
+
+============================================
+CONSIGLI:
+============================================
+
+1. Bilancia le risorse
+   - Soldi per comprare
+   - Petrolio per attaccare (20P per unita)
+   - Tecnologia per upgrade
+
+2. Mantieni territori chiave
+   - Piu li tieni, piu producono
+   - A livello 8 = missili a lungo raggio!
+
+3. Mix unita
+   - Fanteria = Economica, difesa
+   - Carri = Bilanciato, flessibile
+   - Aerei = Costosi, lungo raggio
+
+4. Usa Console Comando
+   - Si apre ogni turno
+   - Statistiche complete
+   - Suggerimenti strategici
+
+============================================
+CARATTERISTICHE:
+============================================
+
+- 100+ territori mondiali realistici
+- 5 fazioni giocabili
+- IA intelligente per 4 avversari
+- Sistema 3 risorse complesso
+- Sviluppo territori progressivo
+- Portate differenziate per unita
+- Missili a lungo raggio
+- Bomba atomica devastante
+- Grafica professionale
+- Animazioni fluide
+- Particelle ed effetti
+- Console strategica
+
+============================================
+REQUISITI:
+============================================
+
+- Windows 10/11
+- Tutti i file devono stare nella stessa cartella:
+  * Axis_And_Allies_1942.exe
+  * centri.json
+  * mappa_bn.jpg
+  * mappa_hd.jpg
+
+============================================
+DOCUMENTAZIONE:
+============================================
+
+GIOCO_FINALE.md = Manuale completo
+SISTEMA_ESPANSIONE_E_MISSILI.md = Crescita territori
+PORTATA_UNITA.md = Sistema portate
+README.md = Guida rapida
+
+============================================
+PROBLEMI?
+============================================
+
+Se l'antivirus blocca l'EXE:
+- E' un falso positivo (l'EXE e' sicuro!)
+- Aggiungi eccezione nell'antivirus
+
+Se non si avvia:
+- Verifica che tutti i file siano presenti
+- Controlla che centri.json sia nella stessa cartella
+
+============================================
+CREDITI:
+============================================
+
+Sviluppato con Python e Pygame
+Ispirato da Risk e Axis & Allies
+
+Versione: 1.0 FINALE
+Data: 19 Ottobre 2025
+
+============================================
+
+BUON DIVERTIMENTO E CONQUISTA IL MONDO!
+
+============================================
+

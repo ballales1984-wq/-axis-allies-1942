@@ -1,0 +1,1586 @@
+"""
+Axis & Allies 1942 - Sistema Armamenti Avanzato
+Con Carri Armati, Aerei, Fanteria e sistema durabilità
+"""
+
+import pygame
+import sys
+import json
+import os
+import random
+import math
+from console_comando import CommandConsole
+from grafica_migliorata import GraphicsEnhancer, UnitIcon, create_territory_sprite
+from effetti_visivi import ParticleSystem, BattleAnimation, MissileAnimation
+
+# Fix per PyInstaller - trova i file anche nell'EXE
+def resource_path(relative_path):
+    """Ottieni path assoluto per file, funziona anche con PyInstaller"""
+    try:
+        # PyInstaller crea una cartella temporanea _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        # Se non è un EXE, usa la directory corrente
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+SCREEN_WIDTH = 1400
+SCREEN_HEIGHT = 800
+
+# 5 ALLEANZE GEOGRAFICHE
+FACTIONS = {
+    "usa": {"name": "USA", "color": (50, 100, 255), "money": 5000, "oil": 1000, "tech": 0},
+    "europa": {"name": "EUROPA", "color": (220, 50, 50), "money": 5000, "oil": 1000, "tech": 0},
+    "russia": {"name": "RUSSIA", "color": (150, 150, 255), "money": 5000, "oil": 1000, "tech": 0},
+    "cina": {"name": "CINA", "color": (255, 220, 50), "money": 5000, "oil": 1000, "tech": 0},
+    "africa": {"name": "AFRICA", "color": (50, 200, 50), "money": 5000, "oil": 1000, "tech": 0}
+}
+
+COLOR_SELECTED = (255, 215, 0)
+
+# LIVELLI TECNOLOGIA
+TECH_LEVELS = [
+    {"points": 0, "name": "Base", "bonus_attack": 0, "bonus_defense": 0},
+    {"points": 100, "name": "Avanzato", "bonus_attack": 2, "bonus_defense": 1},
+    {"points": 300, "name": "Moderno", "bonus_attack": 5, "bonus_defense": 3},
+    {"points": 600, "name": "Futuro", "bonus_attack": 10, "bonus_defense": 5}
+]
+
+# TIPI UNITÀ
+class UnitType:
+    FANTERIA = "fanteria"
+    CARRO = "carro"
+    AEREO = "aereo"
+    NUKE = "nuke"
+
+# STATISTICHE UNITÀ
+UNIT_STATS = {
+    "fanteria": {
+        "name": "Fanteria",
+        "cost": 50,
+        "repair_cost": 20,
+        "attack": 2,
+        "defense": 2,
+        "hp": 10,
+        "durability": 10,
+        "range": 100,  # CORTO RAGGIO - solo vicinissimi
+        "icon": "F"
+    },
+    "carro": {
+        "name": "Carro Armato",
+        "cost": 500,
+        "repair_cost": 200,
+        "attack": 8,
+        "defense": 6,
+        "hp": 50,
+        "durability": 8,
+        "range": 200,  # MEDIO RAGGIO - stati confinanti
+        "icon": "C"
+    },
+    "aereo": {
+        "name": "Aereo",
+        "cost": 1500,
+        "repair_cost": 600,
+        "attack": 15,
+        "defense": 5,
+        "hp": 30,
+        "durability": 6,
+        "range": 500,  # LUNGO RAGGIO - proiezione globale
+        "icon": "A"
+    },
+    "nuke": {
+        "name": "BOMBA ATOMICA",
+        "cost": 10000,
+        "range": 9999,  # ILLIMITATO
+        "attack": 999,
+        "defense": 0,
+        "icon": "☢",
+        "repair_cost": 0,
+        "hp": 1,
+        "durability": 1
+    }
+}
+
+class Unit:
+    """Singola unità militare"""
+    def __init__(self, unit_type, turn_created):
+        self.type = unit_type
+        stats = UNIT_STATS[unit_type]
+        self.name = stats["name"]
+        self.attack = stats["attack"]
+        self.defense = stats["defense"]
+        self.hp = stats["hp"]
+        self.max_hp = stats["hp"]
+        self.durability = stats["durability"]
+        self.age = 0  # turni di vita
+        self.turn_created = turn_created
+        self.needs_repair = False
+    
+    def age_unit(self):
+        """Invecchia l'unità di 1 turno"""
+        self.age += 1
+        if self.age >= self.durability:
+            self.needs_repair = True
+    
+    def repair(self):
+        """Ripara l'unità"""
+        self.hp = self.max_hp
+        self.age = 0
+        self.needs_repair = False
+    
+    def take_damage(self, damage):
+        """Riceve danno"""
+        self.hp -= damage
+        if self.hp <= 0:
+            return True  # Distrutto
+        return False
+
+class Territory:
+    """Territorio con 3 RISORSE che CRESCONO nel tempo"""
+    def __init__(self, data):
+        self.id = data['id']
+        self.name = data.get('name', f"Stato_{self.id}")
+        self.x = data['x']
+        self.y = data['y']
+        self.original_color = tuple(data.get('color', [150, 150, 150]))
+        
+        # Proprietà
+        self.owner = None
+        self.units = []  # Lista di Unit
+        self.selected = False
+        self.radius = 4
+        
+        # 3 RISORSE BASE del territorio
+        self.base_income = random.randint(100, 500)  # Soldi base
+        self.base_oil = random.randint(50, 200)  # Petrolio base
+        self.base_tech = random.randint(10, 50)  # Tech base
+        
+        # BONUS TEMPORALI - crescono ogni turno mantenuto!
+        self.turns_held = 0  # Turni sotto stesso proprietario
+        self.development_level = 0  # Livello sviluppo (0-10)
+        
+        # DIFESE ACQUISTABILI (fortificazioni permanenti)
+        self.bunkers = 0      # Bunker: +5 difesa ($300)
+        self.towers = 0       # Torre: +10 difesa ($800)
+        self.fortress = 0     # Fortezza: +30 difesa ($2500)
+    
+    @property
+    def income(self):
+        """Reddito aumenta con sviluppo"""
+        return self.base_income + (self.development_level * 50)
+    
+    @property
+    def oil_production(self):
+        """Petrolio aumenta con sviluppo"""
+        return self.base_oil + (self.development_level * 20)
+    
+    @property
+    def tech_points(self):
+        """Tech aumenta con sviluppo"""
+        return self.base_tech + (self.development_level * 5)
+    
+    def advance_development(self):
+        """Avanza sviluppo ogni turno mantenuto"""
+        self.turns_held += 1
+        # Ogni 2 turni aumenta development (max 10)
+        if self.turns_held % 2 == 0 and self.development_level < 10:
+            self.development_level += 1
+            return True  # Segnala upgrade
+        return False
+    
+    def reset_development(self):
+        """RESET sviluppo quando conquistato"""
+        self.turns_held = 0
+        self.development_level = 0
+    
+    def add_unit(self, unit_type, turn):
+        """Aggiungi unità"""
+        self.units.append(Unit(unit_type, turn))
+    
+    def get_color(self):
+        """Colore squadra"""
+        if self.owner and self.owner in FACTIONS:
+            return FACTIONS[self.owner]["color"]
+        return (150, 150, 150)
+    
+    def contains_point(self, px, py):
+        """Check click"""
+        dist_sq = (px - self.x)**2 + (py - self.y)**2
+        return dist_sq <= 100
+    
+    def get_total_attack(self, tech_bonus=0):
+        """Potenza attacco totale con BONUS TECNOLOGIA"""
+        base_attack = sum(u.attack for u in self.units if not u.needs_repair)
+        return base_attack + tech_bonus
+    
+    def get_total_defense(self, tech_bonus=0):
+        """Potenza difesa totale con BONUS TECNOLOGIA + DIFESE STRUTTURALI"""
+        base_defense = sum(u.defense for u in self.units if not u.needs_repair)
+        defense_with_tech = base_defense + tech_bonus
+        
+        # AGGIUNGI DIFESE STRUTTURALI
+        structural_defense = (self.bunkers * 5) + (self.towers * 10) + (self.fortress * 30)
+        
+        return defense_with_tech + structural_defense
+    
+    def count_units_by_type(self):
+        """Conta unità per tipo"""
+        counts = {"fanteria": 0, "carro": 0, "aereo": 0}
+        for u in self.units:
+            counts[u.type] += 1
+        return counts
+    
+    def age_all_units(self):
+        """Invecchia tutte le unità"""
+        for u in self.units:
+            u.age_unit()
+    
+    def get_visual_radius(self):
+        """Raggio visivo aumenta con sviluppo"""
+        return self.radius + self.development_level
+    
+    def get_attack_range(self):
+        """Raggio attacco aumenta con sviluppo"""
+        # Base: 50 pixel (solo vicini)
+        # Max sviluppo (10): 300 pixel (lunga distanza!)
+        return 50 + (self.development_level * 25)
+    
+    def has_missiles(self):
+        """Ha missili a lungo raggio?"""
+        return self.development_level >= 8  # Livello 8+ = missili!
+    
+    def draw(self, surface, font_small, graphics):
+        """Disegna territorio con CRESCITA VISIVA"""
+        color = self.get_color()
+        visual_radius = self.get_visual_radius()
+        
+        # CERCHIO DI INFLUENZA (cresce con sviluppo!)
+        if self.development_level > 0:
+            influence_radius = 20 + (self.development_level * 5)
+            influence_alpha = 30 + (self.development_level * 5)
+            
+            s = pygame.Surface((influence_radius * 2, influence_radius * 2), pygame.SRCALPHA)
+            pygame.draw.circle(s, (*color, influence_alpha), (influence_radius, influence_radius), influence_radius)
+            surface.blit(s, (self.x - influence_radius, self.y - influence_radius))
+        
+        # GLOW se selezionato
+        if self.selected:
+            graphics.draw_pulsing_circle(surface, (self.x, self.y), visual_radius + 8, COLOR_SELECTED, self.id)
+        
+        # Puntino CRESCE con sviluppo!
+        glow_intensity = 2 + self.development_level // 2
+        graphics.draw_glowing_circle(surface, (self.x, self.y), visual_radius, color, glow_intensity)
+        
+        # Bordo brillante
+        pygame.draw.circle(surface, (255, 255, 255, 180), (self.x, self.y), visual_radius, 1)
+        
+        # INDICATORE MISSILI (se livello 8+)
+        if self.has_missiles():
+            # Cerchio rosso esterno = raggio missili
+            missile_range_visual = 40
+            s_range = pygame.Surface((missile_range_visual * 2, missile_range_visual * 2), pygame.SRCALPHA)
+            pygame.draw.circle(s_range, (255, 0, 0, 50), (missile_range_visual, missile_range_visual), missile_range_visual)
+            pygame.draw.circle(s_range, (255, 0, 0, 100), (missile_range_visual, missile_range_visual), missile_range_visual, 2)
+            surface.blit(s_range, (self.x - missile_range_visual, self.y - missile_range_visual))
+            
+            # Icona missile
+            missile_icon = font_small.render("🚀", True, (255, 100, 100))
+            surface.blit(missile_icon, (self.x + visual_radius + 3, self.y - 8))
+        
+        # Stella sviluppo (>= 5)
+        if self.development_level >= 5:
+            # Stella dorata pulsante
+            pulse = math.sin(pygame.time.get_ticks() / 300 + self.id) * 0.2 + 1
+            star_size = int(8 * pulse)
+            
+            dev_text = font_small.render(f"★{self.development_level}", True, (255, 215, 0))
+            dev_rect = dev_text.get_rect(center=(self.x, self.y - 14))
+            
+            # Glow dietro stella
+            glow = pygame.Surface((dev_rect.width + 10, dev_rect.height + 6), pygame.SRCALPHA)
+            pygame.draw.circle(glow, (255, 215, 0, 100), 
+                             (glow.get_width()//2, glow.get_height()//2), star_size)
+            surface.blit(glow, (dev_rect.x - 5, dev_rect.y - 3))
+            
+            # Sfondo testo
+            bg_dev = pygame.Surface((dev_rect.width + 6, dev_rect.height + 4))
+            bg_dev.set_alpha(230)
+            bg_dev.fill((0, 0, 0))
+            surface.blit(bg_dev, (dev_rect.x - 3, dev_rect.y - 2))
+            surface.blit(dev_text, dev_rect)
+
+class BuyMenu:
+    """Menu acquisto unità TRASCINABILE"""
+    def __init__(self, territory, faction, turn):
+        self.territory = territory
+        self.faction = faction
+        self.turn = turn
+        self.active = True
+        self.selected_item = None
+        
+        # Posizione menu - OCEANO ATLANTICO (sinistra)
+        self.x = 20  # Molto a sinistra
+        self.y = 120  # Sotto il pannello info
+        self.width = 350  # Un po' più stretto
+        self.height = 680  # Più alto per DIFESE
+        
+        # Drag & drop
+        self.dragging = False
+        self.drag_offset_x = 0
+        self.drag_offset_y = 0
+    
+    def draw(self, surface, font, font_small):
+        """Disegna menu MIGLIORATO"""
+        # Sfondo con gradiente
+        bg = pygame.Surface((self.width, self.height))
+        bg.set_alpha(250)
+        bg.fill((20, 25, 40))
+        surface.blit(bg, (self.x, self.y))
+        
+        # Bordo elegante
+        border_color = (100, 255, 150) if self.dragging else (255, 200, 50)
+        pygame.draw.rect(surface, border_color, (self.x, self.y, self.width, self.height), 4)
+        pygame.draw.rect(surface, (0, 0, 0), (self.x + 4, self.y + 4, self.width - 8, self.height - 8), 1)
+        
+        # Barra titolo bella
+        title_bar_height = 45
+        title_bar_color = (40, 60, 100) if not self.dragging else (60, 255, 60)
+        pygame.draw.rect(surface, title_bar_color, (self.x, self.y, self.width, title_bar_height))
+        pygame.draw.rect(surface, (255, 255, 255), (self.x, self.y + title_bar_height - 2, self.width, 2))
+        
+        # Icona drag e titolo
+        drag_text = font.render("☰", True, (200, 200, 200))
+        surface.blit(drag_text, (self.x + 10, self.y + 10))
+        
+        # Titolo con nome città
+        title = font.render(f"ARMERIA - {self.territory.name.upper()}", True, (255, 255, 100))
+        surface.blit(title, (self.x + 45, self.y + 12))
+        
+        # Soldi con icona
+        money = FACTIONS[self.faction]["money"]
+        money_bg = pygame.Surface((self.width - 20, 35))
+        money_bg.fill((30, 80, 30))
+        surface.blit(money_bg, (self.x + 10, self.y + 52))
+        
+        money_text = font.render(f"💰 Soldi: ${money}", True, (100, 255, 100))
+        surface.blit(money_text, (self.x + 20, self.y + 58))
+        
+        # ===== SEZIONE STATO TERRITORIO =====
+        state_bg = pygame.Surface((self.width - 20, 115))
+        state_bg.fill((30, 40, 60))
+        surface.blit(state_bg, (self.x + 10, self.y + 95))
+        
+        # Info territorio
+        terr_info = font_small.render("STATO TERRITORIO:", True, (150, 200, 255))
+        surface.blit(terr_info, (self.x + 20, self.y + 100))
+        
+        # Sviluppo
+        dev_text = font_small.render(f"⭐ Sviluppo: {self.territory.development_level}/10", True, (255, 215, 0))
+        surface.blit(dev_text, (self.x + 25, self.y + 118))
+        
+        # Produzione risorse
+        prod_title = font_small.render("PRODUZIONE/TURNO:", True, (180, 180, 180))
+        surface.blit(prod_title, (self.x + 25, self.y + 138))
+        
+        money_prod = font_small.render(f"💰 ${self.territory.income}", True, (100, 255, 100))
+        surface.blit(money_prod, (self.x + 30, self.y + 155))
+        
+        oil_prod = font_small.render(f"⛽ {self.territory.oil_production}P", True, (255, 200, 100))
+        surface.blit(oil_prod, (self.x + 135, self.y + 155))
+        
+        tech_prod = font_small.render(f"🔬 {self.territory.tech_points}T", True, (150, 150, 255))
+        surface.blit(tech_prod, (self.x + 240, self.y + 155))
+        
+        # Unità presenti (compatto)
+        counts = self.territory.count_units_by_type()
+        units_text = font_small.render("UNITÀ:", True, (200, 255, 200))
+        surface.blit(units_text, (self.x + 25, self.y + 175))
+        
+        unit_detail = f"F:{counts['fanteria']} C:{counts['carro']} A:{counts['aereo']}"
+        units_count = font_small.render(unit_detail, True, (255, 255, 255))
+        surface.blit(units_count, (self.x + 75, self.y + 175))
+        
+        total_units = len(self.territory.units)
+        total_text = font_small.render(f"Tot: {total_units}", True, (200, 200, 200))
+        surface.blit(total_text, (self.x + 200, self.y + 175))
+        
+        # Separatore
+        pygame.draw.line(surface, (100, 100, 150), 
+                        (self.x + 15, self.y + 175), 
+                        (self.x + self.width - 15, self.y + 175), 2)
+        
+        # ===== SEZIONE ACQUISTA =====
+        buy_title = font_small.render("ACQUISTA ARMAMENTI:", True, (255, 215, 100))
+        surface.blit(buy_title, (self.x + 20, self.y + 185))
+        
+        # Pulsanti acquisto
+        y_offset = 205
+        for i, unit_type in enumerate(["fanteria", "carro", "aereo"]):
+            stats = UNIT_STATS[unit_type]
+            self.draw_buy_button(surface, font, font_small, unit_type, stats, 
+                               self.x + 15, self.y + y_offset, i + 1)
+            y_offset += 95
+        
+        # Pulsante BOMBA ATOMICA (SPECIALE!)
+        self.draw_nuke_button(surface, font, font_small, self.x + 15, self.y + y_offset)
+        y_offset += 65
+        
+        # Pulsante RIPARA
+        self.draw_repair_button(surface, font, font_small, self.x + 15, self.y + y_offset)
+        y_offset += 60
+        
+        # ===== SEZIONE DIFESE =====
+        pygame.draw.line(surface, (100, 150, 200), 
+                        (self.x + 15, self.y + y_offset), 
+                        (self.x + self.width - 15, self.y + y_offset), 2)
+        y_offset += 10
+        
+        def_title = font_small.render("COSTRUISCI DIFESE:", True, (100, 255, 100))
+        surface.blit(def_title, (self.x + 20, self.y + y_offset))
+        y_offset += 25
+        
+        # Pulsanti DIFESE
+        self.draw_defense_buttons(surface, font_small, self.x + 15, self.y + y_offset)
+        
+        # Help alla fine
+        help_text = font_small.render("CLICCA pulsanti | Trascina barra | ESC=Chiudi", True, (150, 150, 200))
+        surface.blit(help_text, (self.x + 15, self.y + self.height - 20))
+    
+    def draw_buy_button(self, surface, font, font_small, unit_type, stats, x, y, number):
+        """Disegna PULSANTE acquisto CLICCABILE"""
+        button_width = 320
+        button_height = 85
+        
+        # Salva rect per click detection
+        button_rect = pygame.Rect(x, y, button_width, button_height)
+        if not hasattr(self, 'buttons'):
+            self.buttons = {}
+        self.buttons[unit_type] = button_rect
+        
+        # Check hover
+        mouse_pos = pygame.mouse.get_pos()
+        is_hover = button_rect.collidepoint(mouse_pos)
+        
+        # Sfondo pulsante con colore (più chiaro se hover)
+        if unit_type == "fanteria":
+            bg_color = (80, 120, 80) if is_hover else (60, 80, 60)
+        elif unit_type == "carro":
+            bg_color = (120, 100, 70) if is_hover else (80, 70, 50)
+        else:  # aereo
+            bg_color = (70, 90, 130) if is_hover else (50, 60, 90)
+        
+        pygame.draw.rect(surface, bg_color, (x, y, button_width, button_height))
+        
+        # Bordo più spesso se hover
+        border_width = 3 if is_hover else 2
+        pygame.draw.rect(surface, (255, 200, 50), (x, y, button_width, button_height), border_width)
+        
+        # Numero tasto grande
+        key_circle = pygame.Surface((35, 35), pygame.SRCALPHA)
+        pygame.draw.circle(key_circle, (255, 255, 100), (17, 17), 17)
+        pygame.draw.circle(key_circle, (0, 0, 0), (17, 17), 17, 2)
+        surface.blit(key_circle, (x + 8, y + 25))
+        
+        key_text = font.render(str(number), True, (0, 0, 0))
+        key_rect = key_text.get_rect(center=(x + 25, y + 42))
+        surface.blit(key_text, key_rect)
+        
+        # Nome unità GRANDE
+        name_text = font.render(f"{stats['icon']} {stats['name']}", True, (255, 255, 255))
+        surface.blit(name_text, (x + 55, y + 8))
+        
+        # Costo EVIDENTE
+        cost_text = font.render(f"${stats['cost']}", True, (100, 255, 100))
+        surface.blit(cost_text, (x + 55, y + 35))
+        
+        # Stats compatte
+        stats_text = font_small.render(
+            f"ATT:{stats['attack']} DEF:{stats['defense']} HP:{stats['hp']}", 
+            True, (200, 200, 200)
+        )
+        surface.blit(stats_text, (x + 55, y + 62))
+    
+    def draw_nuke_button(self, surface, font, font_small, x, y):
+        """Pulsante BOMBA ATOMICA"""
+        button_width = 320
+        button_height = 55
+        
+        # Salva rect
+        button_rect = pygame.Rect(x, y, button_width, button_height)
+        if not hasattr(self, 'buttons'):
+            self.buttons = {}
+        self.buttons['nuke'] = button_rect
+        
+        # Check hover
+        mouse_pos = pygame.mouse.get_pos()
+        is_hover = button_rect.collidepoint(mouse_pos)
+        
+        # Sfondo ROSSO lampeggiante
+        import time
+        flash = int(time.time() * 3) % 2
+        if flash:
+            bg_color = (180, 20, 20) if is_hover else (150, 0, 0)
+        else:
+            bg_color = (140, 0, 0) if is_hover else (120, 0, 0)
+        
+        pygame.draw.rect(surface, bg_color, (x, y, button_width, button_height))
+        
+        border_width = 4 if is_hover else 3
+        pygame.draw.rect(surface, (255, 50, 50), (x, y, button_width, button_height), border_width)
+        
+        # Icona atomica
+        nuke_icon = font.render("☢", True, (255, 255, 0))
+        surface.blit(nuke_icon, (x + 12, y + 12))
+        
+        # Testo
+        name_text = font.render("BOMBA ATOMICA", True, (255, 255, 255))
+        surface.blit(name_text, (x + 45, y + 8))
+        
+        cost_text = font.render("$10,000", True, (255, 255, 100))
+        surface.blit(cost_text, (x + 45, y + 30))
+    
+    def draw_repair_button(self, surface, font, font_small, x, y):
+        """Pulsante RIPARA CLICCABILE"""
+        button_width = 320
+        button_height = 50
+        
+        # Salva rect per click
+        button_rect = pygame.Rect(x, y, button_width, button_height)
+        if not hasattr(self, 'buttons'):
+            self.buttons = {}
+        self.buttons['repair'] = button_rect
+        
+        # Check hover
+        mouse_pos = pygame.mouse.get_pos()
+        is_hover = button_rect.collidepoint(mouse_pos)
+        
+        # Sfondo arancione (più chiaro se hover)
+        bg_color = (140, 80, 30) if is_hover else (100, 60, 20)
+        pygame.draw.rect(surface, bg_color, (x, y, button_width, button_height))
+        
+        border_width = 4 if is_hover else 3
+        pygame.draw.rect(surface, (255, 150, 50), (x, y, button_width, button_height), border_width)
+        
+        # Tasto R
+        key_circle = pygame.Surface((35, 35), pygame.SRCALPHA)
+        pygame.draw.circle(key_circle, (255, 200, 100), (17, 17), 17)
+        pygame.draw.circle(key_circle, (0, 0, 0), (17, 17), 17, 2)
+        surface.blit(key_circle, (x + 8, y + 7))
+        
+        key_text = font.render("R", True, (0, 0, 0))
+        key_rect = key_text.get_rect(center=(x + 25, y + 24))
+        surface.blit(key_text, key_rect)
+        
+        # Testo
+        repair_text = font.render("🔧 RIPARA TUTTE LE UNITÀ", True, (255, 255, 255))
+        surface.blit(repair_text, (x + 55, y + 15))
+    
+    def contains_point(self, px, py):
+        """Check se punto è dentro il menu"""
+        return (self.x <= px <= self.x + self.width and 
+                self.y <= py <= self.y + self.height)
+    
+    def in_title_bar(self, px, py):
+        """Check se punto è nella barra titolo (per drag)"""
+        return (self.x <= px <= self.x + self.width and 
+                self.y <= py <= self.y + 40)
+    
+    def start_drag(self, mouse_x, mouse_y):
+        """Inizia trascinamento"""
+        self.dragging = True
+        self.drag_offset_x = mouse_x - self.x
+        self.drag_offset_y = mouse_y - self.y
+    
+    def stop_drag(self):
+        """Fine trascinamento"""
+        self.dragging = False
+    
+    def update_position(self, mouse_x, mouse_y):
+        """Aggiorna posizione durante drag"""
+        if self.dragging:
+            self.x = mouse_x - self.drag_offset_x
+            self.y = mouse_y - self.drag_offset_y
+            
+            # Limiti schermo
+            self.x = max(0, min(self.x, 1400 - self.width))
+            self.y = max(0, min(self.y, 800 - self.height))
+    
+    def handle_click_button(self, mouse_pos):
+        """Gestisce CLICK sui pulsanti"""
+        if not hasattr(self, 'buttons'):
+            return None
+        
+        for button_name, button_rect in self.buttons.items():
+            if button_rect.collidepoint(mouse_pos):
+                if button_name == "fanteria":
+                    return self.buy_unit("fanteria")
+                elif button_name == "carro":
+                    return self.buy_unit("carro")
+                elif button_name == "aereo":
+                    return self.buy_unit("aereo")
+                elif button_name == "nuke":
+                    return "nuke_mode"  # Attiva modalità lancio
+                elif button_name == "repair":
+                    return self.repair_units()
+                elif button_name == "bunker":
+                    return self.buy_defense("bunker", 300, 5)
+                elif button_name == "tower":
+                    return self.buy_defense("tower", 800, 10)
+                elif button_name == "fortress":
+                    return self.buy_defense("fortress", 2500, 30)
+        return None
+    
+    def handle_key(self, key):
+        """Gestisce input TASTIERA (alternativa ai click)"""
+        if key == pygame.K_1:
+            return self.buy_unit("fanteria")
+        elif key == pygame.K_2:
+            return self.buy_unit("carro")
+        elif key == pygame.K_3:
+            return self.buy_unit("aereo")
+        elif key == pygame.K_n:
+            return "nuke_mode"  # Modalità lancio nuke
+        elif key == pygame.K_r:
+            return self.repair_units()
+        elif key == pygame.K_4:
+            return self.buy_defense("bunker", 300, 5)
+        elif key == pygame.K_5:
+            return self.buy_defense("tower", 800, 10)
+        elif key == pygame.K_6:
+            return self.buy_defense("fortress", 2500, 30)
+        elif key == pygame.K_ESCAPE:
+            self.active = False
+        return None
+    
+    def buy_unit(self, unit_type):
+        """Compra unità"""
+        cost = UNIT_STATS[unit_type]["cost"]
+        if FACTIONS[self.faction]["money"] >= cost:
+            FACTIONS[self.faction]["money"] -= cost
+            self.territory.add_unit(unit_type, self.turn)
+            return f"Comprato: {UNIT_STATS[unit_type]['name']}"
+        return "Soldi insufficienti!"
+    
+    def repair_units(self):
+        """Ripara unità danneggiate"""
+        repaired = 0
+        total_cost = 0
+        for unit in self.territory.units:
+            if unit.needs_repair:
+                cost = UNIT_STATS[unit.type]["repair_cost"]
+                if FACTIONS[self.faction]["money"] >= cost:
+                    FACTIONS[self.faction]["money"] -= cost
+                    unit.repair()
+                    repaired += 1
+                    total_cost += cost
+        
+        if repaired > 0:
+            return f"Riparate {repaired} unita (${total_cost})"
+        return "Nessuna unita da riparare"
+    
+    def buy_defense(self, defense_type, cost, bonus):
+        """Acquista DIFESA strutturale"""
+        if FACTIONS[self.faction]["money"] >= cost:
+            FACTIONS[self.faction]["money"] -= cost
+            
+            if defense_type == "bunker":
+                self.territory.bunkers += 1
+                return f"[OK] Bunker (+5 DEF) Tot: {self.territory.bunkers}"
+            elif defense_type == "tower":
+                self.territory.towers += 1
+                return f"[OK] Torre (+10 DEF) Tot: {self.territory.towers}"
+            elif defense_type == "fortress":
+                self.territory.fortress += 1
+                return f"[OK] Fortezza (+30 DEF) Tot: {self.territory.fortress}"
+        else:
+            return f"Servono ${cost}!"
+
+class Game:
+    """Gioco completo"""
+    
+    def __init__(self):
+        pygame.init()
+        
+        # SCHERMO 1400x800
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_caption("Axis & Allies 1942 - ALLEANZE MONDIALI")
+        self.clock = pygame.time.Clock()
+        self.fullscreen = False
+        
+        self.font = pygame.font.Font(None, 24)
+        self.font_small = pygame.font.Font(None, 16)
+        self.font_large = pygame.font.Font(None, 32)
+        self.font_title = pygame.font.Font(None, 48)
+        
+        self.background = self.load_background()
+        self.territories = self.load_territories()
+        
+        self.faction_order = ["usa", "europa", "russia", "cina", "africa"]
+        self.current_faction_idx = 0
+        self.current_faction = self.faction_order[0]
+        self.turn = 1
+        
+        # Sistema IA - solo USA è umano (giocatore), gli altri sono PC
+        self.human_faction = "usa"
+        self.ai_factions = ["europa", "russia", "cina", "africa"]
+        
+        self.assign_territories()
+        
+        self.selected = None
+        self.mode = "select"
+        self.buy_menu = None
+        self.message = ""
+        self.message_timer = 0
+        
+        # Sistema NUKE
+        self.nuke_mode = False
+        self.nuke_animations = []
+        
+        # TIMER RISORSE - accumulo graduale
+        self.resource_timer = 0
+        self.seconds_in_turn = 0
+        
+        # CONSOLE DI COMANDO - Apri subito per il primo turno!
+        self.command_console = CommandConsole(
+            self.current_faction,
+            self.territories,
+            FACTIONS,
+            self.turn,
+            TECH_LEVELS
+        )
+        
+        # SISTEMA PARTICELLE E ANIMAZIONI
+        self.particles = ParticleSystem()
+        self.battle_animations = []
+        self.missile_animations = []
+        
+        print("="*70)
+        print("AXIS & ALLIES 1942 - ALLEANZE MONDIALI")
+        print("="*70)
+        print("TU controlli: USA")
+        print("PC controlla: EUROPA, RUSSIA, CINA, AFRICA")
+        print()
+        print("NUOVO! Sistema 3 RISORSE:")
+        print("  [+] Conquista territorio -> Prendi TUTTE le risorse!")
+        print("  [$] Soldi - Compra armamenti")
+        print("  [P] Petrolio - Serve per muovere e attaccare")
+        print("  [T] Tecnologia - Upgrade armamenti automatici")
+        print()
+        print("Armamenti: Fanteria ($50), Carro ($500), Aereo ($1500)")
+        print("Controlli:")
+        print("  Click territorio = APRE ARMERIA automaticamente")
+        print("  A = Attacco")
+        print("  I = Info territorio")
+        print("  SPAZIO = Fine turno (solo nel TUO turno)")
+        print("  Nel menu: Click pulsanti o 1/2/3/R")
+        print()
+        print("IA gioca automaticamente nei suoi turni!")
+        print("="*70)
+    
+    def load_background(self):
+        """Carica mappa - funziona anche con EXE"""
+        # Prova prima mappa_bn.jpg
+        path_bn = resource_path("mappa_bn.jpg")
+        if os.path.exists(path_bn):
+            return pygame.image.load(path_bn)
+        
+        # Se non trova, prova mappa_hd.jpg
+        path_hd = resource_path("mappa_hd.jpg")
+        if os.path.exists(path_hd):
+            return pygame.image.load(path_hd)
+        
+        print("[WARNING] Nessuna mappa trovata! Usando sfondo blu.")
+        return None
+    
+    def load_territories(self):
+        """Carica territori - funziona anche con EXE"""
+        path = resource_path("centri.json")
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return [Territory(item) for item in data]
+    
+    def assign_territories(self):
+        """Assegna territori con unità iniziali"""
+        shuffled = list(range(len(self.territories)))
+        random.shuffle(shuffled)
+        per_faction = len(self.territories) // 5
+        
+        for i, faction in enumerate(self.faction_order):
+            start = i * per_faction
+            end = start + per_faction if i < 4 else len(self.territories)
+            
+            for idx in shuffled[start:end]:
+                self.territories[idx].owner = faction
+                # Unità iniziali casuali
+                for _ in range(random.randint(2, 4)):
+                    self.territories[idx].add_unit("fanteria", 0)
+                for _ in range(random.randint(0, 2)):
+                    self.territories[idx].add_unit("carro", 0)
+    
+    def next_turn(self):
+        """Prossimo turno con CRESCITA TERRITORI"""
+        # Raccogli TUTTE le risorse E avanza sviluppo
+        income = 0
+        oil = 0
+        tech = 0
+        upgraded_count = 0
+        
+        for t in self.territories:
+            if t.owner == self.current_faction:
+                # Raccogli risorse (con bonus sviluppo!)
+                income += t.income
+                oil += t.oil_production
+                tech += t.tech_points
+                
+                # Avanza sviluppo territorio
+                if t.advance_development():
+                    upgraded_count += 1
+                
+                # Invecchia unità
+                t.age_all_units()
+        
+        FACTIONS[self.current_faction]["money"] += income
+        FACTIONS[self.current_faction]["oil"] += oil
+        FACTIONS[self.current_faction]["tech"] += tech
+        
+        msg = f"{FACTIONS[self.current_faction]['name']} +${income} +{oil}P +{tech}T"
+        if upgraded_count > 0:
+            msg += f" | {upgraded_count} sviluppati!"
+        
+        self.show_message(msg)
+        
+        # Prossima fazione
+        self.current_faction_idx = (self.current_faction_idx + 1) % len(self.faction_order)
+        self.current_faction = self.faction_order[self.current_faction_idx]
+        
+        if self.current_faction_idx == 0:
+            self.turn += 1
+        
+        self.mode = "select"
+        if self.selected:
+            self.selected.selected = False
+        self.selected = None
+        
+        # RESET timer turno
+        self.seconds_in_turn = 0
+        self.resource_timer = 0
+        
+        # APRI CONSOLE se è turno umano
+        if self.current_faction == self.human_faction:
+            self.command_console = CommandConsole(
+                self.current_faction,
+                self.territories,
+                FACTIONS,
+                self.turn,
+                TECH_LEVELS
+            )
+        
+        # Se è turno IA, esegui automaticamente
+        if self.current_faction in self.ai_factions:
+            pygame.time.set_timer(pygame.USEREVENT + 1, 1500)  # IA agisce dopo 1.5s
+    
+    def activate_nuke_mode(self):
+        """Attiva modalità lancio nuke"""
+        # Check costo
+        if FACTIONS[self.current_faction]["money"] < 10000:
+            self.show_message("Servono $10,000 per la Bomba Atomica!")
+            return
+        
+        # Paga
+        FACTIONS[self.current_faction]["money"] -= 10000
+        self.nuke_mode = True
+        self.buy_menu = None
+        self.show_message("BOMBA ATOMICA PRONTA! Click su bersaglio...")
+        print("\n[NUKE] Bomba atomica acquistata! Seleziona bersaglio...")
+    
+    def launch_nuke(self, pos):
+        """Lancia bomba atomica su posizione"""
+        # Trova territorio target
+        target = None
+        for t in self.territories:
+            if t.contains_point(pos[0], pos[1]):
+                target = t
+                break
+        
+        if not target:
+            self.nuke_mode = False
+            return
+        
+        print(f"\n[☢ NUKE] Lanciata su {target.name}!")
+        
+        # Trova tutti i territori entro raggio 150 pixel
+        nuke_radius = 150
+        affected = []
+        
+        for t in self.territories:
+            dist = ((t.x - target.x)**2 + (t.y - target.y)**2) ** 0.5
+            if dist <= nuke_radius:
+                affected.append(t)
+        
+        print(f"  [☢] {len(affected)} territori colpiti!")
+        
+        # DISTRUGGE tutto nell'area
+        for t in affected:
+            # Uccidi tutte le unità
+            t.units = []
+            
+            # RESET sviluppo
+            t.reset_development()
+            
+            # Diventa neutrale
+            old_owner = t.owner
+            t.owner = None
+            
+            print(f"    [-] {t.name} DISTRUTTO!")
+        
+        # Animazione esplosione
+        self.nuke_animations.append({
+            "x": target.x,
+            "y": target.y,
+            "radius": 10,
+            "max_radius": nuke_radius,
+            "alpha": 255
+        })
+        
+        self.nuke_mode = False
+        self.show_message(f"☢ NUKE! {len(affected)} territori distrutti!")
+    
+    def show_message(self, msg):
+        """Mostra messaggio temporaneo"""
+        self.message = msg
+        self.message_timer = 180
+        print(f"[INFO] {msg}")
+    
+    def get_tech_level(self, faction):
+        """Ottieni livello tecnologia"""
+        tech_points = FACTIONS[faction]["tech"]
+        level = 0
+        for i, lvl in enumerate(TECH_LEVELS):
+            if tech_points >= lvl["points"]:
+                level = i
+        return TECH_LEVELS[level]
+    
+    def show_territory_info(self):
+        """Mostra info territorio CON RISORSE"""
+        if not self.selected:
+            return
+        
+        t = self.selected
+        counts = t.count_units_by_type()
+        
+        # Bonus tech se è tuo territorio
+        tech_bonus_att = 0
+        tech_bonus_def = 0
+        if t.owner == self.current_faction:
+            tech_level = self.get_tech_level(self.current_faction)
+            tech_bonus_att = tech_level["bonus_attack"]
+            tech_bonus_def = tech_level["bonus_defense"]
+        
+        att = t.get_total_attack(tech_bonus_att)
+        deff = t.get_total_defense(tech_bonus_def)
+        
+        # Info con sviluppo e portata
+        dev_info = f"Sviluppo:{t.development_level}/10" if t.development_level > 0 else "Nuovo"
+        range_info = f"Raggio:{t.get_attack_range()}px"
+        missile_info = " [MISSILI]" if t.has_missiles() else ""  # Niente emoji!
+        msg = f"{t.name}: F:{counts['fanteria']} C:{counts['carro']} A:{counts['aereo']} | ATT:{att} DEF:{deff} | {range_info}{missile_info} | ${t.income} {t.oil_production}P {t.tech_points}T | {dev_info}"
+        self.show_message(msg)
+    
+    def attack(self, attacker, defender):
+        """Sistema combattimento con PORTATA PER TIPO UNITÀ"""
+        if attacker.owner != self.current_faction:
+            self.show_message("Non e' il tuo territorio")
+            return
+        
+        if defender.owner == self.current_faction:
+            self.show_message("Non puoi attaccare te stesso")
+            return
+        
+        if len(attacker.units) == 0:
+            self.show_message("Nessuna unita per attaccare")
+            return
+        
+        # CALCOLA DISTANZA
+        distance = ((attacker.x - defender.x)**2 + (attacker.y - defender.y)**2) ** 0.5
+        
+        # FILTRA unità per PORTATA
+        units_by_range = {
+            "fanteria": [],
+            "carro": [],
+            "aereo": [],
+            "nuke": []
+        }
+        
+        for unit in attacker.units:
+            unit_range = UNIT_STATS[unit.type]["range"]
+            if distance <= unit_range:
+                units_by_range[unit.type].append(unit)
+        
+        # Conta unità che possono attaccare
+        total_units = len(attacker.units)
+        attacking_units = sum(len(units) for units in units_by_range.values())
+        
+        if attacking_units == 0:
+            # NESSUNA unità può raggiungere!
+            attack_range = attacker.get_attack_range()
+            if attacker.has_missiles() and distance > attack_range:
+                # Usa missili se disponibili
+                self.missile_attack(attacker, defender, distance)
+                return
+            else:
+                self.show_message(f"FUORI PORTATA! Dist:{int(distance)}px (F:100 C:200 A:500)")
+                return
+        
+        # Mostra quali unità partecipano
+        if attacking_units < total_units:
+            excluded = total_units - attacking_units
+            msg = f"[!] {excluded} unita FUORI PORTATA! (F:100 C:200 A:500)"
+            print(f"[INFO] {msg}")
+            self.show_message(msg)
+        
+        # CALCOLA quante unità (di quelle in portata) possono essere rifornite
+        oil_per_unit = 20
+        oil_available = FACTIONS[attacker.owner]["oil"]
+        
+        # Unità rifornibili (solo quelle in portata!)
+        units_with_fuel = min(attacking_units, oil_available // oil_per_unit)
+        
+        if units_with_fuel == 0:
+            oil_cost = attacking_units * oil_per_unit
+            self.show_message(f"Petrolio insufficiente! Servono {oil_cost}P")
+            return
+        
+        # Consuma petrolio per le unità rifornite
+        oil_cost = units_with_fuel * oil_per_unit
+        oil_used = oil_cost
+        FACTIONS[attacker.owner]["oil"] -= oil_used
+        
+        # Messaggio se attacco parziale per petrolio
+        if units_with_fuel < attacking_units:
+            print(f"\n[PETROLIO] Solo {units_with_fuel}/{attacking_units} unità in portata rifornite!")
+            self.show_message(f"Attacco con {units_with_fuel}/{attacking_units} unità (-{oil_used}P)")
+        
+        # Salva proprietario originale
+        original_defender_owner = defender.owner
+        
+        # BONUS TECNOLOGIA
+        att_tech = self.get_tech_level(attacker.owner)
+        def_tech = self.get_tech_level(defender.owner) if defender.owner else TECH_LEVELS[0]
+        
+        # CALCOLA POTENZA solo dalle unità in portata e rifornite
+        attack_power = 0
+        units_counted = 0
+        
+        for unit_type, units in units_by_range.items():
+            if units and units_counted < units_with_fuel:
+                units_to_add = min(len(units), units_with_fuel - units_counted)
+                unit_attack = UNIT_STATS[unit_type]["attack"]
+                attack_power += units_to_add * unit_attack * (1 + att_tech["bonus_attack"] / 100)
+                units_counted += units_to_add
+        
+        att_power = int(attack_power)
+        def_power = defender.get_total_defense(def_tech["bonus_defense"])
+        
+        print(f"\n[BATTAGLIA] {attacker.name} vs {defender.name}")
+        print(f"  Distanza: {int(distance)}px")
+        print(f"  Unità in portata: {attacking_units}/{total_units}")
+        print(f"  F:{len(units_by_range['fanteria'])} C:{len(units_by_range['carro'])} A:{len(units_by_range['aereo'])}")
+        print(f"  Unità rifornite: {units_with_fuel}/{attacking_units} (-{oil_used}P)")
+        print(f"  Attacco: {att_power} | Difesa: {def_power}")
+        
+        # Perdite basate su potenza
+        att_losses = max(0, def_power // 5)
+        def_losses = max(0, att_power // 5)
+        
+        # Rimuovi unità casuali
+        for _ in range(att_losses):
+            if attacker.units:
+                attacker.units.pop(random.randint(0, len(attacker.units) - 1))
+        
+        for _ in range(def_losses):
+            if defender.units:
+                defender.units.pop(random.randint(0, len(defender.units) - 1))
+        
+        # Conquista?
+        if len(defender.units) == 0:
+            # TERRITORIO CONQUISTATO! PRENDI TUTTE LE RISORSE!
+            
+            # BONUS immediati dalle risorse del territorio
+            money_bonus = defender.income * 3
+            oil_bonus = defender.oil_production * 5
+            tech_bonus = defender.tech_points * 2
+            
+            FACTIONS[attacker.owner]["money"] += money_bonus
+            FACTIONS[attacker.owner]["oil"] += oil_bonus
+            FACTIONS[attacker.owner]["tech"] += tech_bonus
+            
+            print(f"\n  [CONQUISTA] {defender.name}")
+            print(f"  + ${money_bonus} soldi")
+            print(f"  + {oil_bonus} petrolio")
+            print(f"  + {tech_bonus} punti tech")
+            
+            # Check upgrade tecnologia
+            new_tech_level = self.get_tech_level(attacker.owner)
+            if new_tech_level["name"] != TECH_LEVELS[0]["name"]:
+                print(f"  [TECH] Livello: {new_tech_level['name']} (+{new_tech_level['bonus_attack']} ATT, +{new_tech_level['bonus_defense']} DEF)")
+            
+            # Penalità per chi perde
+            if original_defender_owner is not None:
+                loss = defender.income * 2
+                FACTIONS[original_defender_owner]["money"] = max(0, FACTIONS[original_defender_owner]["money"] - loss)
+            
+            # RESET SVILUPPO quando conquistato!
+            old_dev_level = defender.development_level
+            defender.reset_development()
+            
+            if old_dev_level > 0:
+                print(f"  [RESET] Sviluppo {old_dev_level} -> 0 (conquistato)")
+            
+            # Cambia proprietà
+            defender.owner = attacker.owner
+            
+            # Sposta metà unità
+            half = len(attacker.units) // 2
+            for _ in range(half):
+                if attacker.units:
+                    defender.units.append(attacker.units.pop())
+            
+            # EFFETTI VISIVI CONQUISTA!
+            self.particles.add_conquest_effect(defender.x, defender.y, FACTIONS[attacker.owner]["color"])
+            self.particles.add_money_effect(defender.x, defender.y, money_bonus)
+            
+            # Messaggio
+            if attacker.owner == self.human_faction:
+                self.show_message(f"[+] {defender.name}! ${money_bonus} {oil_bonus}P {tech_bonus}T")
+            else:
+                self.show_message(f"[IA] Conquista {defender.name}")
+        else:
+            self.show_message(f"[-{oil_cost}P] Att:-{att_losses} Def:-{def_losses}")
+        
+        # Animazione battaglia
+        self.battle_animations.append(BattleAnimation((attacker.x, attacker.y), (defender.x, defender.y)))
+    
+    def missile_attack(self, attacker, defender, distance):
+        """ATTACCO CON MISSILI a lungo raggio!"""
+        print(f"\n[MISSILI] {attacker.name} -> {defender.name} (distanza: {int(distance)})")
+        
+        # COSTO MAGGIORATO per missili
+        total_units = len(attacker.units)
+        oil_per_unit = 50  # Missili costano più petrolio!
+        oil_available = FACTIONS[attacker.owner]["oil"]
+        
+        units_with_fuel = min(total_units, oil_available // oil_per_unit)
+        
+        if units_with_fuel == 0:
+            self.show_message("PETROLIO INSUFFICIENTE per missili!")
+            return
+        
+        oil_used = units_with_fuel * oil_per_unit
+        FACTIONS[attacker.owner]["oil"] -= oil_used
+        
+        # POTENZA RIDOTTA a distanza (50% normale)
+        att_tech = self.get_tech_level(attacker.owner)
+        full_power = attacker.get_total_attack(att_tech["bonus_attack"])
+        missile_power = int(full_power * 0.5 * (units_with_fuel / total_units))
+        
+        def_tech = self.get_tech_level(defender.owner) if defender.owner else TECH_LEVELS[0]
+        def_power = defender.get_total_defense(def_tech["bonus_defense"])
+        
+        print(f"  Potenza missile: {missile_power} vs Difesa: {def_power}")
+        
+        # Battaglia
+        att_losses = max(0, def_power // 10)
+        def_losses = max(0, missile_power // 5)
+        
+        for _ in range(att_losses):
+            if attacker.units:
+                attacker.units.pop(random.randint(0, len(attacker.units) - 1))
+        
+        for _ in range(def_losses):
+            if defender.units:
+                defender.units.pop(random.randint(0, len(defender.units) - 1))
+        
+        # Conquista se distrutto
+        if len(defender.units) == 0:
+            old_owner = defender.owner
+            defender.owner = attacker.owner
+            defender.reset_development()
+            
+            # Bonus ridotti (attacco a distanza)
+            money_bonus = defender.income * 2
+            oil_bonus = defender.oil_production * 3
+            tech_bonus = defender.tech_points
+            
+            FACTIONS[attacker.owner]["money"] += money_bonus
+            FACTIONS[attacker.owner]["oil"] += oil_bonus
+            FACTIONS[attacker.owner]["tech"] += tech_bonus
+            
+            # Effetti
+            self.particles.add_conquest_effect(defender.x, defender.y, FACTIONS[attacker.owner]["color"])
+            
+            self.show_message(f"[MISSILE] {defender.name} conquistato! +${money_bonus}")
+        else:
+            self.show_message(f"[MISSILE -{oil_used}P] Att:-{att_losses} Def:-{def_losses}")
+        
+        # ANIMAZIONE MISSILE
+        self.missile_animations.append(MissileAnimation((attacker.x, attacker.y), (defender.x, defender.y)))
+    
+    def ai_turn(self):
+        """Turno dell'IA"""
+        print(f"\n[IA] Turno {FACTIONS[self.current_faction]['name']}")
+        
+        # 1. COMPRA UNITÀ
+        my_territories = [t for t in self.territories if t.owner == self.current_faction]
+        money = FACTIONS[self.current_faction]["money"]
+        
+        for terr in my_territories[:3]:  # Solo primi 3 territori
+            if money >= 1500:  # Compra aereo se ricco
+                terr.add_unit("aereo", self.turn)
+                money -= 1500
+                self.show_message(f"[IA] {terr.name}: Comprato Aereo")
+            elif money >= 500:  # Altrimenti carro
+                terr.add_unit("carro", self.turn)
+                money -= 500
+                self.show_message(f"[IA] {terr.name}: Comprato Carro")
+            elif money >= 50:  # O fanteria
+                terr.add_unit("fanteria", self.turn)
+                money -= 50
+        
+        FACTIONS[self.current_faction]["money"] = money
+        
+        # 2. ATTACCA territori nemici
+        for terr in my_territories:
+            if len(terr.units) < 2:
+                continue
+            
+            # Trova nemici vicini (simulato - attacca casualmente)
+            enemies = [t for t in self.territories 
+                      if t.owner != self.current_faction and t.owner is not None]
+            
+            if enemies and random.random() < 0.3:  # 30% chance attacco
+                target = random.choice(enemies)
+                
+                # Attacca se superiore
+                if terr.get_total_attack() > target.get_total_defense():
+                    self.show_message(f"[IA] Attacco: {terr.name} -> {target.name}")
+                    self.attack(terr, target)
+                    break  # Un attacco per turno
+        
+        # 3. Fine turno automatico dopo 2 secondi
+        pygame.time.set_timer(pygame.USEREVENT + 2, 2000)
+    
+    def run(self):
+        """Game loop"""
+        running = True
+        ai_timer_active = False
+        
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                
+                # Timer IA
+                elif event.type == pygame.USEREVENT + 1:
+                    pygame.time.set_timer(pygame.USEREVENT + 1, 0)  # Disattiva
+                    self.ai_turn()
+                
+                elif event.type == pygame.USEREVENT + 2:
+                    pygame.time.set_timer(pygame.USEREVENT + 2, 0)  # Disattiva
+                    self.next_turn()
+                
+                elif event.type == pygame.KEYDOWN:
+                    if self.command_console:
+                        # Console attiva - SPAZIO o ESC per chiudere
+                        if event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE:
+                            self.command_console = None
+                    elif self.buy_menu:
+                        msg = self.buy_menu.handle_key(event.key)
+                        if msg == "nuke_mode":
+                            self.activate_nuke_mode()
+                        elif msg:
+                            self.show_message(msg)
+                        if not self.buy_menu.active:
+                            self.buy_menu = None
+                    else:
+                        if event.key == pygame.K_ESCAPE:
+                            running = False
+                        elif event.key == pygame.K_SPACE:
+                            # Solo se è turno umano
+                            if self.current_faction == self.human_faction:
+                                self.next_turn()
+                            else:
+                                self.show_message("Aspetta il turno dell'IA...")
+                        elif event.key == pygame.K_a:
+                            self.mode = "attack"
+                            self.show_message("Seleziona territorio da attaccare")
+                        elif event.key == pygame.K_i:
+                            self.show_territory_info()
+                        elif event.key == pygame.K_n:
+                            # Tasto scorciatoia per NUKE
+                            if FACTIONS[self.current_faction]["money"] >= 10000:
+                                self.activate_nuke_mode()
+                            else:
+                                self.show_message("Servono $10,000 per Nuke!")
+                        
+                        elif event.key == pygame.K_ESCAPE:
+                            # Chiudi menu/console
+                            if self.buy_menu:
+                                self.buy_menu = None
+                            elif self.command_console:
+                                self.command_console = None
+                            elif self.nuke_mode:
+                                self.nuke_mode = False
+                                self.show_message("Nuke cancellata")
+                
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        # Console comando - click su pulsante
+                        if self.command_console:
+                            if self.command_console.handle_click(event.pos):
+                                self.command_console = None
+                        # Solo se è turno umano
+                        elif self.current_faction != self.human_faction:
+                            self.show_message("Non e' il tuo turno!")
+                        elif self.buy_menu:
+                            # Check prima se clicco su un PULSANTE del menu
+                            msg = self.buy_menu.handle_click_button(event.pos)
+                            if msg == "nuke_mode":
+                                self.activate_nuke_mode()
+                            elif msg:
+                                self.show_message(msg)
+                            # Altrimenti check se clicco sulla barra titolo per trascinare
+                            elif self.buy_menu.in_title_bar(event.pos[0], event.pos[1]):
+                                self.buy_menu.start_drag(event.pos[0], event.pos[1])
+                        elif self.nuke_mode:
+                            # Lancia nuke su target
+                            self.launch_nuke(event.pos)
+                        else:
+                            self.handle_click(event.pos)
+                
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1 and self.buy_menu:
+                        self.buy_menu.stop_drag()
+                
+                elif event.type == pygame.MOUSEMOTION:
+                    if self.buy_menu and self.buy_menu.dragging:
+                        self.buy_menu.update_position(event.pos[0], event.pos[1])
+            
+            self.draw()
+            pygame.display.flip()
+            self.clock.tick(60)
+        
+        pygame.quit()
+        sys.exit()
+    
+    def handle_click(self, pos):
+        """Click handler"""
+        clicked = None
+        for t in self.territories:
+            if t.contains_point(pos[0], pos[1]):
+                clicked = t
+                break
+        
+        if not clicked:
+            return
+        
+        if self.mode == "select":
+            if self.selected:
+                self.selected.selected = False
+            self.selected = clicked
+            clicked.selected = True
+            self.show_territory_info()
+            
+            # APRI ARMERIA AUTOMATICAMENTE se è tuo territorio
+            if clicked.owner == self.current_faction:
+                self.buy_menu = BuyMenu(clicked, self.current_faction, self.turn)
+        
+        elif self.mode == "attack":
+            if self.selected:
+                self.attack(self.selected, clicked)
+            self.mode = "select"
+    
+    def draw(self):
+        """Disegna tutto"""
+        if self.background:
+            self.screen.blit(self.background, (0, 0))
+        else:
+            self.screen.fill((40, 70, 100))
+        
+        # Territori con grafica migliorata
+        gfx = GraphicsEnhancer()
+        for t in self.territories:
+            t.draw(self.screen, self.font_small, gfx)
+        
+        # Animazioni battaglie
+        self.draw_battle_animations()
+        
+        # Animazioni MISSILI
+        self.draw_missile_animations()
+        
+        # Animazioni NUKE
+        self.draw_nuke_animations()
+        
+        # Sistema particelle
+        self.particles.update()
+        self.particles.draw(self.screen, self.font_small)
+        
+        # UI
+        self.draw_ui()
+        
+        # Menu acquisto
+        if self.buy_menu:
+            self.buy_menu.draw(self.screen, self.font, self.font_small)
+        
+        # CONSOLE DI COMANDO (sopra tutto!)
+        if self.command_console:
+            self.command_console.draw(self.screen, self.font, self.font_small, 
+                                     self.font_large, self.font_title)
+        
+        # Cursore NUKE
+        if self.nuke_mode and not self.command_console:
+            mouse_pos = pygame.mouse.get_pos()
+            # Cerchio rosso lampeggiante
+            pygame.draw.circle(self.screen, (255, 0, 0), mouse_pos, 150, 3)
+            pygame.draw.circle(self.screen, (255, 255, 0), mouse_pos, 5)
+            
+            nuke_text = self.font_small.render("ZONA IMPATTO", True, (255, 0, 0))
+            self.screen.blit(nuke_text, (mouse_pos[0] - 40, mouse_pos[1] - 170))
+        
+        # Messaggio
+        if self.message_timer > 0:
+            msg = self.font.render(self.message, True, (255, 255, 100))
+            rect = msg.get_rect(center=(SCREEN_WIDTH // 2, 120))
+            bg = pygame.Surface((rect.width + 20, rect.height + 10))
+            bg.set_alpha(220)
+            bg.fill((0, 0, 0))
+            self.screen.blit(bg, (rect.x - 10, rect.y - 5))
+            self.screen.blit(msg, rect)
+            self.message_timer -= 1
+    
+    def draw_battle_animations(self):
+        """Disegna animazioni battaglie"""
+        to_remove = []
+        
+        for i, anim in enumerate(self.battle_animations):
+            anim.update()
+            anim.draw(self.screen)
+            
+            if not anim.active:
+                to_remove.append(i)
+        
+        for i in reversed(to_remove):
+            self.battle_animations.pop(i)
+    
+    def draw_missile_animations(self):
+        """Disegna animazioni missili"""
+        to_remove = []
+        
+        for i, anim in enumerate(self.missile_animations):
+            anim.update()
+            anim.draw(self.screen)
+            
+            if not anim.active:
+                to_remove.append(i)
+        
+        for i in reversed(to_remove):
+            self.missile_animations.pop(i)
+    
+    def draw_nuke_animations(self):
+        """Disegna esplosioni nucleari"""
+        to_remove = []
+        
+        for i, anim in enumerate(self.nuke_animations):
+            # Espandi cerchio
+            anim["radius"] += 8
+            anim["alpha"] -= 8
+            
+            if anim["alpha"] <= 0 or anim["radius"] > anim["max_radius"]:
+                to_remove.append(i)
+                continue
+            
+            # Disegna esplosione
+            s = pygame.Surface((anim["radius"] * 2, anim["radius"] * 2), pygame.SRCALPHA)
+            
+            # Cerchi concentrici rosso-arancio
+            pygame.draw.circle(s, (255, 100, 0, min(255, anim["alpha"])), 
+                             (anim["radius"], anim["radius"]), anim["radius"])
+            pygame.draw.circle(s, (255, 200, 0, min(255, anim["alpha"] // 2)), 
+                             (anim["radius"], anim["radius"]), anim["radius"] // 2)
+            pygame.draw.circle(s, (255, 255, 255, min(255, anim["alpha"] // 3)), 
+                             (anim["radius"], anim["radius"]), anim["radius"] // 4)
+            
+            self.screen.blit(s, (anim["x"] - anim["radius"], anim["y"] - anim["radius"]))
+        
+        # Rimuovi finite
+        for i in reversed(to_remove):
+            self.nuke_animations.pop(i)
+    
+    def draw_ui(self):
+        """UI con TIMER"""
+        panel = pygame.Surface((SCREEN_WIDTH, 100))
+        panel.set_alpha(230)
+        panel.fill((20, 20, 40))
+        self.screen.blit(panel, (0, 0))
+        
+        # Turno con indicatore PC/Umano
+        faction_name = FACTIONS[self.current_faction]["name"]
+        faction_color = FACTIONS[self.current_faction]["color"]
+        
+        if self.current_faction == self.human_faction:
+            turn_text = self.font_large.render(f"TURNO {self.turn}: {faction_name} (TU)", True, faction_color)
+        else:
+            turn_text = self.font_large.render(f"TURNO {self.turn}: {faction_name} (PC)", True, faction_color)
+        
+        self.screen.blit(turn_text, (20, 15))
+        
+        # Timer turno (conta secondi)
+        self.resource_timer += 1
+        if self.resource_timer >= 60:
+            self.resource_timer = 0
+            self.seconds_in_turn += 1
+        
+        timer_text = self.font_small.render(f"Tempo: {self.seconds_in_turn}s", True, (200, 200, 200))
+        self.screen.blit(timer_text, (350, 20))
+        
+        # 3 RISORSE
+        money = FACTIONS[self.current_faction]["money"]
+        oil = FACTIONS[self.current_faction]["oil"]
+        tech = FACTIONS[self.current_faction]["tech"]
+        tech_level = self.get_tech_level(self.current_faction)
+        
+        res_text = self.font.render(f"${money} | {oil}P | {tech}T ({tech_level['name']})", True, (255, 255, 100))
+        self.screen.blit(res_text, (20, 55))
+        
+        # Indicatore produzione prevista prossimo turno
+        income_next = sum(t.income for t in self.territories if t.owner == self.current_faction)
+        oil_next = sum(t.oil_production for t in self.territories if t.owner == self.current_faction)
+        tech_next = sum(t.tech_points for t in self.territories if t.owner == self.current_faction)
+        
+        next_text = self.font_small.render(
+            f"Prossimo turno: +${income_next} +{oil_next}P +{tech_next}T",
+            True, (150, 255, 150)
+        )
+        self.screen.blit(next_text, (20, 78))
+        
+        # Territori
+        x_offset = 400
+        for faction in self.faction_order:
+            count = sum(1 for t in self.territories if t.owner == faction)
+            color = FACTIONS[faction]["color"]
+            text = self.font_small.render(f"{FACTIONS[faction]['name'][:3]}: {count}", True, color)
+            self.screen.blit(text, (x_offset, 25))
+            x_offset += 80
+        
+        # Istruzioni
+        if self.nuke_mode:
+            inst = self.font.render("☢ CLICK per LANCIARE NUKE! ☢", True, (255, 0, 0))
+            self.screen.blit(inst, (450, 55))
+        else:
+            inst = self.font_small.render("Click=Armeria | A=Attacco | N=NUKE | I=Info | SPAZIO=Fine", 
+                                         True, (200, 200, 200))
+            self.screen.blit(inst, (400, 60))
+
+if __name__ == "__main__":
+    game = Game()
+    game.run()
+

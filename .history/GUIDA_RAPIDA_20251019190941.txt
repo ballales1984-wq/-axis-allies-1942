@@ -1,0 +1,127 @@
+═══════════════════════════════════════════════════════════
+  AXIS & ALLIES 1942 - GUIDA RAPIDA
+═══════════════════════════════════════════════════════════
+
+🚀 AVVIO VELOCE
+═══════════════════════════════════════════════════════════
+
+Windows:    Doppio click su AVVIA_GIOCO.bat
+Oppure:     python gioco_completo.py
+
+
+🎮 CONTROLLI ESSENZIALI
+═══════════════════════════════════════════════════════════
+
+Click       → Seleziona territorio
+A           → Attacco (poi click su nemico)
+B           → Compra unità (5 soldi)
+SPAZIO      → Fine turno
+ESC         → Esci
+
+
+🎯 COME GIOCARE
+═══════════════════════════════════════════════════════════
+
+1. SELEZIONA un tuo territorio (puntino colorato)
+2. ATTACCA premendo A, poi click su nemico
+3. COMPRA unità con B se hai soldi
+4. FINE TURNO con SPAZIO
+
+
+⚔️ COMBATTIMENTO
+═══════════════════════════════════════════════════════════
+
+• Servono almeno 2 unità per attaccare
+• Attaccante: 50% probabilità colpire
+• Difensore: 40% probabilità colpire
+• Se difensore a 0 → TERRITORIO CONQUISTATO!
+
+
+💰 ECONOMIA
+═══════════════════════════════════════════════════════════
+
+• Ogni territorio produce 2-8 soldi/turno
+• Soldi raccolti all'inizio del tuo turno
+• Unità costa 5 soldi
+• Più territori = Più soldi = Più potere!
+
+
+🎨 5 SQUADRE
+═══════════════════════════════════════════════════════════
+
+🔴 ROSSI      - Rosso chiaro
+🔵 BLU        - Blu elettrico
+🟢 VERDI      - Verde brillante
+🟡 GIALLI     - Giallo oro
+🟣 VIOLA      - Viola
+
+
+📊 INTERFACCIA
+═══════════════════════════════════════════════════════════
+
+Pannello Alto mostra:
+  • Turno e Squadra attiva
+  • I tuoi Soldi
+  • Territori per ogni squadra
+  • Modalità corrente
+
+
+🗺️ MAPPA
+═══════════════════════════════════════════════════════════
+
+• Sfondo grigio = Mappa mondo politica
+• Puntini colorati = Stati controllati
+• Numeri = Quante unità nel territorio
+• Bordo oro = Territorio selezionato
+
+
+💡 STRATEGIA
+═══════════════════════════════════════════════════════════
+
+✓ Conquista territori ricchi
+✓ Difendi le tue frontiere
+✓ Attacca con superiorità numerica
+✓ Bilancia economia e militare
+✓ Espandi strategicamente
+
+
+🏆 VITTORIA
+═══════════════════════════════════════════════════════════
+
+Vince chi:
+  • Controlla più territori
+  • Elimina tutti gli avversari
+  • Domina economicamente
+
+
+🛠️ FILE IMPORTANTI
+═══════════════════════════════════════════════════════════
+
+gioco_completo.py       - Gioco principale
+centri.json             - Dati 82 territori
+mappa_bn.jpg            - Sfondo B/N
+README.md               - Documentazione completa
+CHANGELOG.md            - Storia sviluppo
+
+
+🎲 ESEMPIO PARTITA
+═══════════════════════════════════════════════════════════
+
+Turno ROSSI:
+1. Click territorio mio (3 unità)
+2. Premo A (modalità attacco)
+3. Click territorio BLU vicino (2 unità)
+4. BATTAGLIA! → Rossi vincono
+5. Territorio BLU diventa ROSSO
+6. Premo B per comprare unità
+7. SPAZIO per finire turno
+
+Turno BLU:
+...e così via!
+
+
+═══════════════════════════════════════════════════════════
+
+Buona guerra strategica! ⚔️🗺️
+
+═══════════════════════════════════════════════════════════

@@ -1,0 +1,145 @@
+========================================
+COME CARICARE SU GUMROAD
+========================================
+
+PREPARAZIONE:
+-------------
+
+1. ✅ Esegui: CREA_EXE_DISTRIBUZIONE.bat
+2. ✅ Aspetta creazione ZIP
+3. ✅ Verifica: DISTRIBUZIONE_GUMROAD\AxisAllies1942_v1.0.zip
+
+FILE CREATO:
+------------
+Nome: AxisAllies1942_v1.0.zip
+Contiene:
+• AxisAllies1942.exe (gioco)
+• mappa_bn.jpg (grafica)
+• mappa_hd.jpg (grafica HD)
+• centri.json (dati territori)
+• README_GUMROAD.txt (istruzioni)
+• LICENZA.txt (licenza uso)
+• GUIDA_GIOCO.txt (manuale completo)
+
+CARICAMENTO SU GUMROAD:
+-----------------------
+
+1. Vai su: https://gumroad.com
+2. Login/Registrati
+3. Click "Create" > "Product"
+
+4. INFORMAZIONI PRODOTTO:
+
+   Nome:
+   -----
+   Axis & Allies 1942 - World War Strategy Game
+
+   URL:
+   ----
+   axisallies1942 (o simile)
+
+   Prezzo:
+   -------
+   €1.00 (PREZZO DI LANCIO!)
+
+   Descrizione:
+   ------------
+   [COPIA da DESCRIZIONE_GUMROAD.txt]
+
+5. UPLOAD FILE:
+
+   • Click "Add File"
+   • Seleziona: AxisAllies1942_v1.0.zip
+   • Aspetta upload completo
+
+6. COPERTINA/THUMBNAIL:
+
+   Crea immagine 1200x630px con:
+   • Titolo "AXIS & ALLIES 1942"
+   • Screenshot gioco
+   • "PREZZO LANCIO: 1€"
+   • Logo/bandiere
+
+7. IMPOSTAZIONI:
+
+   ✓ Download immediato
+   ✓ Licenza: Personale
+   ✓ Aggiornamenti: Abilitati
+   ✓ Categoria: Games > Strategy
+   ✓ Tags: strategy, war, board-game, indie
+
+8. POLICY:
+
+   Licenza: Standard (uso personale)
+   Refund: 7 giorni
+   Updates: Gratis
+
+9. PUBLISH:
+
+   • Rivedi tutto
+   • Click "Publish"
+   • FATTO! 🎉
+
+DOPO LA PUBBLICAZIONE:
+----------------------
+
+✓ Condividi link su social
+✓ Post su Reddit (r/IndieGaming)
+✓ Forum strategia
+✓ Discord communities
+✓ YouTube gameplay
+
+MARKETING CONSIGLIATO:
+----------------------
+
+• Screenshot attraenti
+• Video trailer (30 sec)
+• GIF animate
+• Confronto con giochi famosi
+• Highlights features
+• Testimonianze
+
+PREZZO STRATEGIA:
+-----------------
+
+LANCIO: 1€
+Dopo 100 vendite: 2€
+Dopo 500 vendite: 3€
+Prezzo finale: 4.99€
+
+BUNDLE FUTURO:
+--------------
+
+• + Modalità multiplayer online: +1€
+• + Nuove mappe: +1€
+• + Campagne storiche: +2€
+
+SUPPORTO CLIENTI:
+-----------------
+
+• Email rapida
+• FAQ su pagina
+• Community Discord
+• Update regolari
+
+========================================
+BUONA FORTUNA CON IL LANCIO! 🚀💰
+========================================
+
+Ricorda:
+- Qualità > Quantità
+- Ascolta feedback
+- Aggiorna regolarmente
+- Community first!
+
+PROIEZIONE VENDITE REALISTICHE:
+--------------------------------
+
+Settimana 1: 10-50 vendite (10-50€)
+Mese 1: 50-200 vendite (50-200€)
+Anno 1: 500-2000 vendite (500-2000€)
+
+Con marketing buono e recensioni positive!
+
+========================================
+

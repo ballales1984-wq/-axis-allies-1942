@@ -1,0 +1,177 @@
+========================================
+GUIDA COMPLETA - AXIS & ALLIES 1942
+========================================
+
+OBIETTIVO:
+----------
+Conquista il mondo! Elimina tutti gli avversari e controlla tutti i territori.
+
+RISORSE (LE 3 CHIAVI):
+----------------------
+
+1. SOLDI ($)
+   - Compra unità e difese
+   - Prodotto dai territori
+   - Conquista = +soldi nemico
+
+2. PETROLIO (P)
+   - Necessario per attaccare
+   - 20P per unità inviata
+   - Gestisci con attenzione!
+
+3. TECNOLOGIA (T)
+   - Accumulato nel tempo
+   - 100T = Moderno (+5 ATT, +3 DEF)
+   - 200T = Futuro (+10 ATT, +5 DEF)
+
+UNITÀ MILITARI:
+---------------
+
+FANTERIA - 50$
+• Attacco: 2
+• Difesa: 2
+• Portata: 100px
+• Economica, buona per difesa
+
+CARRO ARMATO - 500$
+• Attacco: 6
+• Difesa: 4
+• Portata: 200px
+• Bilanciato, versatile
+
+AEREO - 1500$
+• Attacco: 12
+• Difesa: 6
+• Portata: 500px
+• Costoso, attacco lungo raggio
+
+DIFESE STRUTTURALI:
+-------------------
+
+BUNKER - 200$
+• +5 Difesa permanente
+• Economico, base
+
+TORRE - 500$
+• +10 Difesa permanente
+• Medio, efficace
+
+FORTEZZA - 1000$
+• +30 Difesa permanente
+• Costoso, inespugnabile!
+
+COMBATTIMENTO:
+--------------
+
+1. Click territorio tuo
+2. Click territorio nemico
+3. Sistema calcola:
+   - Distanza (portata unità)
+   - Petrolio disponibile
+   - Potere attacco vs difesa
+4. Risultato:
+   - VITTORIA = Prendi territorio + risorse
+   - SCONFITTA = Perdi unità
+
+SVILUPPO TERRITORIO:
+--------------------
+
+Più tieni un territorio, più:
+• Aumenta produzione (+10% per livello)
+• Cresce raggio d'influenza
+• Aumenta portata attacco
+• Livello 8+ = MISSILI!
+
+Se conquisti territorio nemico:
+• Sviluppo RESET a 0
+• Devi ricostruire
+
+STRATEGIE VINCENTI:
+-------------------
+
+1. ESPANSIONE RAPIDA
+   - Prendi territori all'inizio
+   - Massimizza produzione
+
+2. SVILUPPO PROFONDO
+   - Tieni territori a lungo
+   - Crescita esponenziale
+
+3. DIFESA STRATEGICA
+   - Fortifica punti chiave
+   - Costruisci difese
+
+4. ATTACCO TATTICO
+   - Usa portata unità
+   - Aerei per long-range
+   - Fanteria per difesa
+
+5. ECONOMIA BILANCIATA
+   - Non spendere tutto!
+   - Riserva petrolio
+   - Investi in tech
+
+TIPS & TRICKS:
+--------------
+
+• Territori costieri = strategici
+• Raggruppa unità = più potere
+• Difese = investimento lungo termine
+• Tech = vantaggio permanente
+• Petrolio = oro, non sprecarlo
+• Sviluppo = pazienza ricompensata
+• Missili (liv 8+) = game changer
+
+ERRORI COMUNI:
+--------------
+
+✗ Attaccare senza petrolio
+✗ Comprare solo unità costose
+✗ Ignorare le difese
+✗ Non sviluppare territori
+✗ Espansione senza consolidamento
+
+COMANDI RAPIDI:
+---------------
+
+Durante TUO turno:
+• 1 = Compra Fanteria
+• 2 = Compra Carro
+• 3 = Compra Aereo
+• 4 = Bunker
+• 5 = Torre
+• 6 = Fortezza
+• R = Ripara unità
+• SPAZIO = Fine turno
+
+HOTKEYS UTILI:
+--------------
+
+• A = Attacco
+• I = Info
+• ESC = Menu/Esci
+• Click = Seleziona
+
+FAQ:
+----
+
+Q: Come vinco?
+A: Elimina tutti gli avversari!
+
+Q: Posso salvare?
+A: Non ancora (prossimo update)
+
+Q: Multiplayer online?
+A: In sviluppo!
+
+Q: Crash/bug?
+A: Contatta sviluppatore
+
+Q: Posso modificare?
+A: No, ma suggerimenti benvenuti!
+
+========================================
+BUONA FORTUNA COMANDANTE! ⚔️🎖️
+========================================
+
+

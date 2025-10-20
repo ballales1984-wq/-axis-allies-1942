@@ -1,0 +1,494 @@
+[
+  {
+    "id": 0,
+    "name": "Canada",
+    "x": 240,
+    "y": 178
+  },
+  {
+    "id": 1,
+    "name": "USA",
+    "x": 213,
+    "y": 254
+  },
+  {
+    "id": 2,
+    "name": "Messico",
+    "x": 162,
+    "y": 318
+  },
+  {
+    "id": 3,
+    "name": "Panama",
+    "x": 190,
+    "y": 347
+  },
+  {
+    "id": 4,
+    "name": "Alaska",
+    "x": 107,
+    "y": 129
+  },
+  {
+    "id": 5,
+    "name": "Groenlandia",
+    "x": 483,
+    "y": 111
+  },
+  {
+    "id": 6,
+    "name": "Brasile",
+    "x": 375,
+    "y": 479
+  },
+  {
+    "id": 7,
+    "name": "Argentina",
+    "x": 335,
+    "y": 551
+  },
+  {
+    "id": 8,
+    "name": "Argentina del Nord",
+    "x": 320,
+    "y": 494
+  },
+  {
+    "id": 9,
+    "name": "Peru",
+    "x": 279,
+    "y": 469
+  },
+  {
+    "id": 10,
+    "name": "Colombia",
+    "x": 267,
+    "y": 395
+  },
+  {
+    "id": 11,
+    "name": "Bolivia",
+    "x": 249,
+    "y": 423
+  },
+  {
+    "id": 12,
+    "name": "Ecuador",
+    "x": 261,
+    "y": 434
+  },
+  {
+    "id": 13,
+    "name": "Venezuela",
+    "x": 309,
+    "y": 385
+  },
+  {
+    "id": 14,
+    "name": "Santo Domingo",
+    "x": 336,
+    "y": 395
+  },
+  {
+    "id": 15,
+    "name": "Belgrado",
+    "x": 350,
+    "y": 396
+  },
+  {
+    "id": 16,
+    "name": "Sarajevo",
+    "x": 363,
+    "y": 397
+  },
+  {
+    "id": 17,
+    "name": "Lagos",
+    "x": 362,
+    "y": 557
+  },
+  {
+    "id": 18,
+    "name": "Praga",
+    "x": 690,
+    "y": 556
+  },
+  {
+    "id": 19,
+    "name": "Tashkent",
+    "x": 650,
+    "y": 229
+  },
+  {
+    "id": 20,
+    "name": "Almaty",
+    "x": 615,
+    "y": 207
+  },
+  {
+    "id": 21,
+    "name": "Novosibirsk",
+    "x": 647,
+    "y": 193
+  },
+  {
+    "id": 22,
+    "name": "Kiev",
+    "x": 594,
+    "y": 243
+  },
+  {
+    "id": 23,
+    "name": "Bishkek",
+    "x": 620,
+    "y": 285
+  },
+  {
+    "id": 24,
+    "name": "Dushanbe",
+    "x": 691,
+    "y": 298
+  },
+  {
+    "id": 25,
+    "name": "Ashgabat",
+    "x": 733,
+    "y": 298
+  },
+  {
+    "id": 26,
+    "name": "Astana",
+    "x": 733,
+    "y": 350
+  },
+  {
+    "id": 27,
+    "name": "Kabul",
+    "x": 684,
+    "y": 351
+  },
+  {
+    "id": 28,
+    "name": "Tehran",
+    "x": 646,
+    "y": 342
+  },
+  {
+    "id": 29,
+    "name": "Baghdad",
+    "x": 596,
+    "y": 338
+  },
+  {
+    "id": 30,
+    "name": "Damasco",
+    "x": 560,
+    "y": 338
+  },
+  {
+    "id": 31,
+    "name": "Minsk",
+    "x": 578,
+    "y": 284
+  },
+  {
+    "id": 32,
+    "name": "Beirut",
+    "x": 571,
+    "y": 386
+  },
+  {
+    "id": 33,
+    "name": "Gerusalemme",
+    "x": 631,
+    "y": 382
+  },
+  {
+    "id": 34,
+    "name": "Islamabad",
+    "x": 658,
+    "y": 398
+  },
+  {
+    "id": 35,
+    "name": "Karachi",
+    "x": 716,
+    "y": 430
+  },
+  {
+    "id": 36,
+    "name": "Lahore",
+    "x": 696,
+    "y": 392
+  },
+  {
+    "id": 37,
+    "name": "Delhi",
+    "x": 778,
+    "y": 382
+  },
+  {
+    "id": 38,
+    "name": "Mumbai",
+    "x": 768,
+    "y": 415
+  },
+  {
+    "id": 39,
+    "name": "Bangalore",
+    "x": 760,
+    "y": 444
+  },
+  {
+    "id": 40,
+    "name": "Chennai",
+    "x": 760,
+    "y": 479
+  },
+  {
+    "id": 41,
+    "name": "Budapest",
+    "x": 680,
+    "y": 513
+  },
+  {
+    "id": 42,
+    "name": "Kolkata",
+    "x": 679,
+    "y": 474
+  },
+  {
+    "id": 43,
+    "name": "Monaco",
+    "x": 805,
+    "y": 506
+  },
+  {
+    "id": 44,
+    "name": "Zurigo",
+    "x": 732,
+    "y": 504
+  },
+  {
+    "id": 45,
+    "name": "Città del Messico",
+    "x": 1142,
+    "y": 532
+  },
+  {
+    "id": 46,
+    "name": "San Paolo",
+    "x": 1241,
+    "y": 441
+  },
+  {
+    "id": 47,
+    "name": "Rio de Janeiro",
+    "x": 1217,
+    "y": 438
+  },
+  {
+    "id": 48,
+    "name": "Buenos Aires",
+    "x": 1103,
+    "y": 421
+  },
+  {
+    "id": 49,
+    "name": "New York",
+    "x": 1108,
+    "y": 395
+  },
+  {
+    "id": 50,
+    "name": "Brno",
+    "x": 1058,
+    "y": 283
+  },
+  {
+    "id": 51,
+    "name": "Cracovia",
+    "x": 1024,
+    "y": 327
+  },
+  {
+    "id": 52,
+    "name": "Pechino",
+    "x": 954,
+    "y": 315
+  },
+  {
+    "id": 53,
+    "name": "Yekaterinburg",
+    "x": 973,
+    "y": 156
+  },
+  {
+    "id": 54,
+    "name": "Riga",
+    "x": 725,
+    "y": 209
+  },
+  {
+    "id": 55,
+    "name": "Omsk",
+    "x": 706,
+    "y": 146
+  },
+  {
+    "id": 56,
+    "name": "Krasnoyarsk",
+    "x": 713,
+    "y": 185
+  },
+  {
+    "id": 57,
+    "name": "Irkutsk",
+    "x": 706,
+    "y": 172
+  },
+  {
+    "id": 58,
+    "name": "Vladivostok",
+    "x": 697,
+    "y": 178
+  },
+  {
+    "id": 59,
+    "name": "Khabarovsk",
+    "x": 681,
+    "y": 192
+  },
+  {
+    "id": 60,
+    "name": "Vilnius",
+    "x": 783,
+    "y": 274
+  },
+  {
+    "id": 61,
+    "name": "Shanghai",
+    "x": 832,
+    "y": 279
+  },
+  {
+    "id": 62,
+    "name": "Tokyo",
+    "x": 801,
+    "y": 315
+  },
+  {
+    "id": 63,
+    "name": "Seoul",
+    "x": 812,
+    "y": 343
+  },
+  {
+    "id": 64,
+    "name": "Pyongyang",
+    "x": 851,
+    "y": 326
+  },
+  {
+    "id": 65,
+    "name": "Hong Kong",
+    "x": 886,
+    "y": 299
+  },
+  {
+    "id": 66,
+    "name": "Taipei",
+    "x": 872,
+    "y": 214
+  },
+  {
+    "id": 67,
+    "name": "Bangkok",
+    "x": 866,
+    "y": 234
+  },
+  {
+    "id": 68,
+    "name": "Hanoi",
+    "x": 998,
+    "y": 214
+  },
+  {
+    "id": 69,
+    "name": "Los Angeles",
+    "x": 1177,
+    "y": 261
+  },
+  {
+    "id": 70,
+    "name": "Lima",
+    "x": 1324,
+    "y": 585
+  },
+  {
+    "id": 71,
+    "name": "Dresda",
+    "x": 1058,
+    "y": 423
+  },
+  {
+    "id": 72,
+    "name": "Singapore",
+    "x": 961,
+    "y": 383
+  },
+  {
+    "id": 73,
+    "name": "Tallin",
+    "x": 639,
+    "y": 246
+  },
+  {
+    "id": 74,
+    "name": "Stoccarda",
+    "x": 600,
+    "y": 189
+  },
+  {
+    "id": 75,
+    "name": "Tomsk",
+    "x": 642,
+    "y": 162
+  },
+  {
+    "id": 76,
+    "name": "Tyumen",
+    "x": 666,
+    "y": 148
+  },
+  {
+    "id": 77,
+    "name": "Stoccolma",
+    "x": 382,
+    "y": 127
+  },
+  {
+    "id": 78,
+    "name": "Amman",
+    "x": 538,
+    "y": 310
+  },
+  {
+    "id": 79,
+    "name": "Kuwait",
+    "x": 533,
+    "y": 356
+  },
+  {
+    "id": 80,
+    "name": "Manila",
+    "x": 817,
+    "y": 382
+  },
+  {
+    "id": 81,
+    "name": "Barnaul",
+    "x": 685,
+    "y": 190
+  }
+]

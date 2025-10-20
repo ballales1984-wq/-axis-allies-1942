@@ -1,0 +1,221 @@
+========================================
+GUIDA COMPLETA GUMROAD - PASSO PASSO
+========================================
+
+PROBLEMA: File caricato troppo piccolo (853 Bytes)
+SOLUZIONE: Caricare il file ZIP corretto (29 MB)
+
+========================================
+PASSO 1: TROVA IL FILE GIUSTO
+========================================
+
+Sul tuo Desktop hai DUE cose:
+
+1. CARTELLA: "AxisAllies1942" 
+   -> NON usare questa!
+
+2. FILE ZIP: "AxisAllies1942_v1.0.zip"
+   -> USA QUESTO! ✓
+
+IMPORTANTE:
+- Il file ZIP è circa 29 MB
+- Se non vedi la dimensione, fai:
+  * Click destro sul file
+  * Proprietà
+  * Guarda "Dimensione: 29 MB"
+
+========================================
+PASSO 2: VAI SU GUMROAD
+========================================
+
+1. Apri browser (Chrome/Edge/Firefox)
+
+2. Vai su: https://gumroad.com
+
+3. Login con il tuo account
+   (quello di "ballales")
+
+========================================
+PASSO 3: MODIFICA IL PRODOTTO
+========================================
+
+1. Vai alla Dashboard:
+   https://app.gumroad.com/products
+
+2. Trova il prodotto "wargames3"
+
+3. Click su "Edit" (Modifica)
+
+========================================
+PASSO 4: RIMUOVI FILE SBAGLIATO
+========================================
+
+1. Nella sezione "Content" (Contenuto)
+
+2. Vedi il file attuale (853 Bytes)
+
+3. Click su icona CESTINO o "X" per eliminarlo
+
+4. Conferma eliminazione
+
+========================================
+PASSO 5: CARICA FILE GIUSTO
+========================================
+
+1. Ancora nella sezione "Content"
+
+2. Click "Add file" o "Upload file"
+
+3. Si apre finestra selezione file
+
+4. Vai su DESKTOP
+
+5. Trova: AxisAllies1942_v1.0.zip
+
+6. VERIFICA che sia circa 29 MB!
+
+7. Seleziona e click "Apri"
+
+8. Aspetta caricamento (può durare 2-5 minuti)
+
+9. Vedi barra progresso
+
+10. Quando finito, vedi:
+    "AxisAllies1942_v1.0.zip - 29 MB" ✓
+
+========================================
+PASSO 6: SALVA MODIFICHE
+========================================
+
+1. Scrolla in fondo alla pagina
+
+2. Click "Save" (Salva)
+
+3. Aspetta conferma
+
+4. Vedi messaggio "Product updated!"
+
+========================================
+PASSO 7: VERIFICA
+========================================
+
+1. Vai alla pagina pubblica del prodotto:
+   https://ballales.gumroad.com/l/moipe
+
+2. Verifica che ora mostri:
+   "AxisAllies1942_v1.0.zip - 29 MB"
+
+3. Se vuoi, prova a scaricarlo
+   (per testare che funziona)
+
+========================================
+PASSO 8: MIGLIORA DESCRIZIONE (OPZIONALE)
+========================================
+
+Mentre sei nella pagina "Edit", migliora anche:
+
+TITOLO:
+-------
+Axis & Allies 1942 - World War Strategy Game
+
+DESCRIZIONE:
+------------
+[Copia da file: DESCRIZIONE_GUMROAD.txt sul Desktop]
+
+IMMAGINI:
+---------
+- Aggiungi screenshot del gioco
+- Screenshot dalla mappa
+- Screenshot battaglia
+
+PREZZO:
+-------
+€3.00 va benissimo!
+(Anche meglio di €1)
+
+========================================
+CHECKLIST FINALE
+========================================
+
+[ ] File ZIP caricato: 29 MB ✓
+[ ] Link funzionante
+[ ] Descrizione completa
+[ ] Prezzo impostato: €3
+[ ] Screenshot (opzionale ma consigliato)
+[ ] Categoria: Games
+
+========================================
+IN CASO DI PROBLEMI
+========================================
+
+PROBLEMA: "Non trovo il file ZIP"
+SOLUZIONE: 
+- Apri: Esplora File
+- Vai su: Desktop
+- Ordina per: Dimensione
+- Cerca file da 29 MB
+
+PROBLEMA: "Caricamento troppo lento"
+SOLUZIONE:
+- Normale per 29 MB
+- Aspetta 3-5 minuti
+- NON chiudere la pagina
+- Guarda barra progresso
+
+PROBLEMA: "Errore durante upload"
+SOLUZIONE:
+- Ricarica pagina
+- Riprova upload
+- Verifica connessione internet
+
+========================================
+DOMANDE FREQUENTI
+========================================
+
+Q: Posso caricare il file .exe direttamente?
+A: NO! Carica SOLO il file ZIP completo.
+   Il ZIP contiene EXE + mappe + dati.
+
+Q: Devo comprimere il ZIP ulteriormente?
+A: NO! È già compresso correttamente.
+
+Q: Quanto costa a me il caricamento?
+A: GRATIS! Gumroad non fa pagare per upload.
+
+Q: I clienti cosa ricevono?
+A: Scaricano il file ZIP (29 MB)
+   Lo estraggono
+   Eseguono AxisAllies1942.exe
+   Giocano!
+
+========================================
+LINK UTILI
+========================================
+
+Dashboard Gumroad:
+https://app.gumroad.com/
+
+Tuo Prodotto (modifica):
+https://app.gumroad.com/products/[trova ID]
+
+Tuo Prodotto (pubblico):
+https://ballales.gumroad.com/l/moipe
+
+Supporto Gumroad:
+https://help.gumroad.com/
+
+========================================
+FATTO!
+========================================
+
+Una volta caricato il file giusto (29 MB),
+il gioco è PRONTO PER LA VENDITA! 🎉
+
+I clienti potranno:
+1. Comprare per €3
+2. Scaricare ZIP (29 MB)
+3. Estrarre
+4. Giocare!
+
+BUONE VENDITE! 💰🎮
+

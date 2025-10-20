@@ -1,0 +1,137 @@
+========================================
+AXIS & ALLIES 1942 - VERSIONE GLOBO 3D
+========================================
+
+NOVITÀ:
+-------
+✨ Mappa mondiale su GLOBO TERRESTRE rotante!
+✨ Grafica 3D completa
+✨ Marker colorati per fazioni
+✨ Rotazione libera del globo
+✨ Zoom dinamico
+
+INSTALLAZIONE:
+--------------
+1. Doppio click: INSTALLA_PANDA3D.bat
+   (Solo la prima volta!)
+
+2. Aspetta installazione (2-3 minuti)
+
+3. Doppio click: GIOCA_GLOBO_3D.bat
+
+CONTROLLI:
+----------
+🖱️ MOUSE:
+• Click e drag = Ruota globo
+• Click su marker = Seleziona territorio
+• Rotellina = Zoom in/out
+
+⌨️ TASTIERA:
+• SPAZIO = Fine turno
+• ESC = Esci
+• Frecce = Ruota (futuro)
+
+DIFFERENZE vs 2D:
+-----------------
+
+GLOBO 3D:
+✓ Vista realistica
+✓ Rotazione libera
+✓ Prospettiva sferica
+✓ Zoom dinamico
+✓ Effetto WOW!
+
+VERSIONE 2D:
+✓ Più veloce
+✓ Vista completa
+✓ Più semplice
+✓ Meno risorse
+
+ENTRAMBE GIOCABILI!
+
+FEATURES 3D:
+------------
+• Globo terrestre texture realistica
+• Marker colorati per fazioni (sfere)
+• Rotazione automatica quando idle
+• Drag per ruotare manualmente
+• Luce direzionale e ambientale
+• Info territorio su click
+• HUD con risorse e turno
+
+PRESTAZIONI:
+------------
+Richiede:
+• GPU discreta (integrata OK)
+• 200 MB RAM
+• Python + Panda3D
+
+Se lento:
+• Chiudi altri programmi
+• Riduci qualità texture
+• Usa versione 2D
+
+ROADMAP 3D:
+-----------
+V1.0 (CORRENTE):
+✓ Globo rotante
+✓ Marker territori
+✓ Click detection
+✓ HUD base
+
+V1.1 (PROSSIMO):
+□ Menu acquisto 3D
+□ Battaglie animate
+□ Linee connessione territori
+□ Effetti particelle
+
+V2.0 (FUTURO):
+□ Modelli 3D unità
+□ Animazioni eserciti
+□ Esplosioni 3D
+□ Missile trails
+
+TIPS:
+-----
+• Ruota per vedere tutto il mondo
+• Zoom in per dettagli
+• Marker più grandi = più unità
+• Colore marker = fazione
+• Auto-rotazione = bellissimo!
+
+COMANDI FUTURI:
+---------------
+(In sviluppo)
+• A = Attacco 3D
+• B = Menu acquisto
+• I = Info dettagliate
+• M = Vista mappa 2D temporanea
+• R = Reset camera
+
+CONFRONTO MODALITÀ:
+-------------------
+
+SINGLEPLAYER 2D:
+- Veloce, completo, IA
+
+HOT SEAT 2D:
+- 5 giocatori, stesso PC
+
+GLOBO 3D:
+- Visualizzazione realistica
+- Esperienza immersiva
+- NUOVO! 
+
+TUTTE disponibili!
+
+========================================
+PROVA IL GLOBO 3D! 🌍🎮
+========================================
+
+1. INSTALLA_PANDA3D.bat (prima volta)
+2. GIOCA_GLOBO_3D.bat
+3. Ruota e gioca!
+
+È BELLISSIMO! ✨
+========================================
+

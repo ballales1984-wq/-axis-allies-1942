@@ -1,0 +1,193 @@
+========================================
+GUIDA COMPLETA - TUTTE LE UNITA
+========================================
+
+AXIS & ALLIES 1942 - ARSENALE COMPLETO
+
+========================================
+1. FANTERIA - Soldato di Base
+========================================
+
+Costo: $50
+Riparazione: $20
+Attacco: 2
+Difesa: 2
+HP: 10
+Portata: 100px (CORTO RAGGIO)
+
+ICONA: Soldatino verde con fucile
+
+STRATEGIA:
+✓ Economica - Ottima per difesa
+✓ Compra in massa per numeri
+✓ Usa per presidiare territori
+✗ Bassa portata - solo vicini
+✗ Attacco debole
+
+========================================
+2. CARRO ARMATO - Forza Corazzata
+========================================
+
+Costo: $500
+Riparazione: $200
+Attacco: 8
+Difesa: 6
+HP: 50
+Portata: 200px (MEDIO RAGGIO)
+
+ICONA: Tank marrone con torretta e cannone
+
+STRATEGIA:
+✓ Bilanciato attacco/difesa
+✓ Può attaccare stati confinanti
+✓ Durabile e versatile
+✗ Costoso (10x fanteria)
+✗ Non può colpire molto lontano
+
+========================================
+3. AEREO - Superiorità Aerea
+========================================
+
+Costo: $1500
+Riparazione: $600
+Attacco: 15
+Difesa: 5
+HP: 30
+Portata: 500px (LUNGO RAGGIO)
+
+ICONA: Aereo blu vista dall'alto
+
+STRATEGIA:
+✓ LUNGA PORTATA - colpisci lontano
+✓ Attacco potente
+✓ Mobilità strategica
+✗ MOLTO COSTOSO
+✗ Difesa debole
+
+========================================
+4. BOMBARDIERE - Arma Strategica (NUOVO!)
+========================================
+
+Costo: $3000
+Riparazione: $1200
+Attacco: 25 (IL PIU POTENTE!)
+Difesa: 3 (DEBOLE)
+HP: 40
+Portata: 700px (SUPERIORE)
+
+ICONA: Bombardiere grigio con bombe rosse
+
+STRATEGIA:
+✓ DEVASTANTE in attacco
+✓ PORTATA MASSIMA
+✓ Sfonda qualsiasi difesa
+✗ COSTOSISSIMO ($3000!)
+✗ Difesa pessima (solo 3)
+✗ Non usare per difendere
+
+QUANDO USARLO:
+- Endgame quando hai molti soldi
+- Attacchi strategici su basi nemiche
+- Sfondare fortezze
+- Eliminare concentrazioni nemiche
+
+========================================
+5. BOMBA ATOMICA - Arma Finale
+========================================
+
+Costo: $10,000
+Attacco: 999 (ISTAKILL)
+Portata: ILLIMITATA
+Area: 200px di raggio
+
+ICONA: Simbolo atomico rosso
+
+STRATEGIA:
+✓ DISTRUGGE TUTTO nell'area
+✓ PORTATA ILLIMITATA
+✓ Game-changer
+✗ COSTOSISSIMA
+✗ Uso singolo
+✗ Effetti collaterali
+
+========================================
+CONFRONTO RAPIDO
+========================================
+
+DIFESA:
+1. Carro (DEF: 6) ⭐
+2. Fanteria (DEF: 2)
+3. Aereo (DEF: 5)
+4. Bombardiere (DEF: 3)
+
+ATTACCO:
+1. Bombardiere (ATT: 25) ⭐⭐⭐
+2. Aereo (ATT: 15) ⭐⭐
+3. Carro (ATT: 8) ⭐
+4. Fanteria (ATT: 2)
+
+PORTATA:
+1. Bombardiere (700px) ⭐⭐⭐
+2. Aereo (500px) ⭐⭐
+3. Carro (200px) ⭐
+4. Fanteria (100px)
+
+COSTO:
+1. Fanteria ($50) ⭐ ECONOMICA
+2. Carro ($500)
+3. Aereo ($1500)
+4. Bombardiere ($3000) ⭐⭐⭐ COSTOSA
+
+========================================
+COMBINAZIONI VINCENTI
+========================================
+
+EARLY GAME (primi turni):
+- 80% Fanteria (numeri!)
+- 20% Carri (spina dorsale)
+
+MID GAME (sviluppo):
+- 40% Fanteria (difesa)
+- 30% Carri (versatilità)
+- 30% Aerei (proiezione)
+
+LATE GAME (endgame):
+- 20% Fanteria (garrison)
+- 20% Carri (difesa mobile)
+- 40% Aerei (attacco)
+- 20% BOMBARDIERI (devastazione!)
+
+ATTACCO MASSICCIO:
+- 5 Bombardieri + 10 Aerei + 20 Carri
+= POTENZA DEVASTANTE!
+
+DIFESA IMPENETRABILE:
+- 50 Fanteria + 20 Carri + Fortezza
+= MURO INVALICABILE!
+
+========================================
+TASTI RAPIDI
+========================================
+
+Nel menu armeria:
+
+ARMAMENTI:
+[1] Fanteria - $50
+[2] Carro - $500
+[3] Aereo - $1500
+[4] BOMBARDIERE - $3000 [NUOVO!]
+[N] Bomba Atomica - $10000
+[R] Ripara
+
+DIFESE:
+[5] Bunker - $300 (+5 DEF)
+[6] Torre - $800 (+10 DEF)
+[7] Fortezza - $2500 (+30 DEF)
+
+========================================
+
+ADESSO HAI 4 TIPI DI UNITA!
+
+DOMINA IL MONDO!
+========================================
+

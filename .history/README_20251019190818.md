@@ -1,0 +1,150 @@
+# Axis & Allies 1942 - Gioco di Guerra Strategico
+
+Un gioco di guerra strategico a turni con 5 squadre che combattono per il controllo del mondo!
+
+## 🎮 Caratteristiche
+
+- **5 Squadre** con colori unici (Rossi, Blu, Verdi, Gialli, Viola)
+- **82 territori** sulla mappa mondiale
+- **Sistema di combattimento** basato su dadi
+- **Economia** - ogni territorio produce soldi
+- **Conquista** - vinci battaglie per espandere il tuo impero
+- **Sistema turni** - ogni squadra gioca in sequenza
+
+## 🚀 Come Avviare
+
+```bash
+python gioco_completo.py
+```
+
+## 🎯 Obiettivo del Gioco
+
+Conquista più territori possibili sconfiggendo le altre squadre!
+
+## 🎮 Controlli
+
+| Tasto | Azione |
+|-------|--------|
+| **Click** | Seleziona territorio |
+| **A** | Modalità ATTACCO (poi click su nemico) |
+| **M** | Modalità MOVIMENTO (muovi truppe) |
+| **B** | Compra unità (costa 5 soldi) |
+| **SPAZIO** | Fine turno (passa alla prossima squadra) |
+| **ESC** | Esci dal gioco |
+
+## 📋 Come Si Gioca
+
+### 1. **Selezione Territorio**
+- Click su un tuo territorio (puntino colorato)
+- Vedi nome, unità e reddito
+
+### 2. **Attacco**
+- Seleziona un tuo territorio con almeno 2 unità
+- Premi **A** per entrare in modalità attacco
+- Click su un territorio nemico confinante
+- La battaglia si risolve automaticamente con i dadi
+  - Attaccante: 50% di colpire per ogni unità
+  - Difensore: 40% di colpire per ogni unità
+- Se il difensore arriva a 0 unità, il territorio viene conquistato!
+
+### 3. **Economia**
+- Ogni territorio produce soldi ogni turno
+- I soldi vengono raccolti automaticamente all'inizio del turno
+- Usa i soldi per comprare unità
+
+### 4. **Acquisto Unità**
+- Seleziona un tuo territorio
+- Premi **B** per comprare 1 unità (costa 5 soldi)
+
+### 5. **Movimento**
+- Premi **M** per entrare in modalità movimento
+- Click sul territorio di partenza
+- Click sul territorio di destinazione (deve essere tuo)
+- 1 unità si sposta
+
+### 6. **Fine Turno**
+- Premi **SPAZIO** quando hai finito
+- Il gioco passa alla squadra successiva
+
+## 🎨 Le 5 Squadre
+
+| Squadra | Colore |
+|---------|--------|
+| 🔴 **ROSSI** | Rosso chiaro |
+| 🔵 **BLU** | Blu elettrico |
+| 🟢 **VERDI** | Verde brillante |
+| 🟡 **GIALLI** | Giallo oro |
+| 🟣 **VIOLA** | Viola |
+
+## 📊 Interfaccia
+
+**Pannello Superiore mostra:**
+- Turno corrente e squadra attiva
+- Soldi disponibili
+- Numero di territori per ogni squadra
+- Modalità corrente (SELECT/ATTACK/MOVE)
+
+## 🗺️ La Mappa
+
+- **Sfondo**: Mappa politica mondiale in bianco e nero
+- **Puntini colorati**: Ogni puntino = un territorio
+- **Colore puntino**: Indica quale squadra controlla il territorio
+- **Numeri**: Mostrano quante unità ci sono nel territorio
+
+## 📁 File del Progetto
+
+- `gioco_completo.py` - Gioco principale
+- `centri.json` - Dati dei territori (posizioni, nomi)
+- `mappa_hd.jpg` - Mappa mondiale ad alta definizione
+- `mappa_bn.jpg` - Mappa in bianco e nero (usata come sfondo)
+- `editor_centri.py` - Editor per aggiungere/modificare territori
+- `converti_mappa_bn.py` - Converte mappa a colori in B/N
+
+## 🛠️ Requisiti
+
+- Python 3.7+
+- Pygame
+- Pillow (PIL)
+
+Installa con:
+```bash
+pip install pygame pillow
+```
+
+## 🎯 Strategia
+
+1. **Controlla territori ricchi** - Più territori = più soldi
+2. **Compra unità nei punti chiave** - Difendi le frontiere
+3. **Attacca con superiorità numerica** - Serve almeno 2:1
+4. **Espandi strategicamente** - Non ti allargare troppo
+5. **Gestisci l'economia** - Bilancia attacco e acquisto
+
+## 🏆 Vittoria
+
+Il gioco continua finché un giocatore non controlla la maggioranza dei territori o elimina tutti gli avversari!
+
+## ✨ Caratteristiche Tecniche
+
+- **82 stati** posizionati manualmente sulla mappa
+- **Sistema dadi probabilistico** per il combattimento
+- **Economia dinamica** - ogni territorio ha reddito variabile
+- **UI informativa** con statistiche in tempo reale
+- **Puntini micro (4px)** per non coprire la mappa
+
+## 🎨 Personalizzazione
+
+Puoi modificare:
+- **Colori squadre**: nel file `gioco_completo.py` nella sezione `FACTIONS`
+- **Territori**: usa `editor_centri.py` per aggiungere/modificare
+- **Costo unità**: modifica `buy_unit()` nel codice
+- **Probabilità combattimento**: modifica `attack()` nel codice
+
+## 📝 Note
+
+- Il gioco salva automaticamente lo stato in memoria durante l'esecuzione
+- Ogni turno la squadra raccoglie automaticamente il reddito
+- I territori neutrali (grigi) possono essere conquistati da chiunque
+
+---
+
+**Buona guerra strategica!** ⚔️🗺️

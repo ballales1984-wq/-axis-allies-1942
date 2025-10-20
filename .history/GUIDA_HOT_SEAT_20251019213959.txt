@@ -1,0 +1,72 @@
+========================================
+MODALITÀ HOT SEAT - GUIDA
+========================================
+
+COS'È HOT SEAT?
+---------------
+Tutti i giocatori giocano sullo STESSO computer!
+Ogni giocatore fa il suo turno, poi passa il PC al prossimo.
+
+PERFETTO per:
+- Giocare con amici a casa
+- LAN party
+- Serate di gioco
+
+COME FUNZIONA:
+--------------
+1. Avvia: GIOCA_HOT_SEAT.bat
+
+2. Ci sono 5 FAZIONI (tutti giocatori umani):
+   - USA (Blu)
+   - EUROPA (Rosso)
+   - RUSSIA (Viola)
+   - CINA (Giallo)
+   - AFRICA (Verde)
+
+3. All'inizio del turno, vedi:
+   "TURNO DI USA! Passa il PC al giocatore USA"
+   
+4. Il giocatore USA fa le sue mosse:
+   - Click su territorio proprio = Menu acquisto
+   - Click su territorio nemico = Attacco
+   - SPAZIO = Fine turno
+
+5. Quando finisce, compare:
+   "TURNO DI EUROPA! Passa il PC al giocatore EUROPA"
+   
+6. Si passa il PC fisicamente al prossimo giocatore!
+
+7. Continua così finché qualcuno vince!
+
+CONTROLLI:
+----------
+- Click territorio tuo = Apri menu acquisto
+- Click territorio nemico = Attacca (se hai selezionato un tuo territorio prima)
+- SPAZIO = Fine turno
+- ESC = Chiudi menu / Esci
+
+STRATEGIA:
+----------
+- Comunica con gli altri giocatori!
+- Forma alleanze temporanee
+- Tradisci al momento giusto
+- Controlla risorse chiave
+- Sviluppa territori
+
+DIFFERENZE vs SINGLEPLAYER:
+---------------------------
+HOT SEAT:
+✓ Tutti giocatori umani
+✓ Nessuna IA
+✓ Più sociale
+✓ Più strategico (trattative!)
+
+SINGLEPLAYER:
+✓ Tu vs 4 IA
+✓ Gioca da solo
+✓ IA aggressiva
+
+========================================
+DIVERTITI! 🎮
+========================================
+

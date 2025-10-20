@@ -1,0 +1,21 @@
+[
+  {"id": 0, "name": "Regno Unito", "x": 280, "y": 550},
+  {"id": 1, "name": "Francia", "x": 360, "y": 480},
+  {"id": 2, "name": "Spagna", "x": 300, "y": 420},
+  {"id": 3, "name": "Germania", "x": 450, "y": 520},
+  {"id": 4, "name": "Italia", "x": 480, "y": 450},
+  {"id": 5, "name": "Polonia", "x": 540, "y": 530},
+  {"id": 6, "name": "Russia", "x": 750, "y": 550},
+  {"id": 7, "name": "Scandinavia", "x": 480, "y": 620},
+  {"id": 8, "name": "Balcani", "x": 560, "y": 460},
+  {"id": 9, "name": "Turchia", "x": 660, "y": 430},
+  {"id": 10, "name": "Nord Africa", "x": 380, "y": 360},
+  {"id": 11, "name": "Egitto", "x": 620, "y": 350},
+  {"id": 12, "name": "Africa Est", "x": 650, "y": 250},
+  {"id": 13, "name": "Medio Oriente", "x": 780, "y": 400},
+  {"id": 14, "name": "India", "x": 900, "y": 380},
+  {"id": 15, "name": "Cina", "x": 1050, "y": 450},
+  {"id": 16, "name": "Giappone", "x": 1250, "y": 470},
+  {"id": 17, "name": "Siberia", "x": 950, "y": 580},
+  {"id": 18, "name": "Manciuria", "x": 1100, "y": 540}
+]

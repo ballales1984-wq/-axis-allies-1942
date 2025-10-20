@@ -1,0 +1,68 @@
+========================================
+AXIS & ALLIES 1942 - ALLEANZE MONDIALI
+========================================
+
+Grazie per l'acquisto! 🎮
+
+INSTALLAZIONE:
+--------------
+1. Estrai lo ZIP in una cartella
+2. Doppio click su: AxisAllies1942.exe
+3. GIOCA!
+
+CONTROLLI:
+----------
+• Click territorio tuo = Menu acquisto
+• Click territorio nemico = Attacca
+• SPAZIO = Fine turno
+• ESC = Chiudi menu / Esci
+• A = Modalità attacco
+• I = Info territorio
+
+MODALITÀ:
+---------
+All'avvio scegli:
+1. SINGLEPLAYER - Tu vs 4 IA
+2. HOT SEAT - 5 giocatori, stesso PC
+
+RISORSE:
+--------
+[$] SOLDI - Compra armamenti
+[P] PETROLIO - Muovi e attacca
+[T] TECNOLOGIA - Upgrade automatici
+
+UNITÀ:
+------
+• Fanteria: 50$ (Portata 100px)
+• Carro: 500$ (Portata 200px)
+• Aereo: 1500$ (Portata 500px)
+
+DIFESE:
+-------
+• Bunker: 200$ (+5 DEF)
+• Torre: 500$ (+10 DEF)
+• Fortezza: 1000$ (+30 DEF)
+
+STRATEGIA:
+----------
+1. Conquista territori per risorse
+2. Sviluppa territori (tienili a lungo!)
+3. Bilancia economia e militare
+4. Usa portata unità tatticamente
+5. Costruisci difese su punti chiave
+
+SUPPORTO:
+---------
+Per bug o domande:
+- Controlla GUIDA_GIOCO.txt
+- Contatta sviluppatore
+
+AGGIORNAMENTI:
+--------------
+Download gratuiti futuri su Gumroad!
+Controlla la tua libreria periodicamente.
+
+========================================
+DIVERTITI E CONQUISTA IL MONDO! 🌍⚔️
+========================================
+
