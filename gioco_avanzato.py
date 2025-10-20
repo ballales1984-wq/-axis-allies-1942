@@ -993,6 +993,12 @@ class Game:
         self.human_faction = "usa"
         self.ai_factions = ["europa", "russia", "cina", "africa"]
         
+        # DIFFICOLTÀ AUMENTATA - IA inizia con PIÙ RISORSE
+        for ai_faction in self.ai_factions:
+            FACTIONS[ai_faction]["money"] = 8000   # Era 5000, ora 8000
+            FACTIONS[ai_faction]["oil"] = 2000     # Era 1000, ora 2000
+            FACTIONS[ai_faction]["tech"] = 50      # Era 0, ora 50 (vantaggio tecnologico)
+        
         self.assign_territories()
         
         self.selected = None
@@ -1083,7 +1089,7 @@ class Game:
         return [Territory(item) for item in data]
     
     def assign_territories(self):
-        """Assegna territori con unità iniziali"""
+        """Assegna territori con unità iniziali - IA PIÙ FORTE"""
         shuffled = list(range(len(self.territories)))
         random.shuffle(shuffled)
         per_faction = len(self.territories) // 5
@@ -1094,11 +1100,23 @@ class Game:
             
             for idx in shuffled[start:end]:
                 self.territories[idx].owner = faction
-                # Unità iniziali casuali
-                for _ in range(random.randint(2, 4)):
-                    self.territories[idx].add_unit("fanteria", 0)
-                for _ in range(random.randint(0, 2)):
-                    self.territories[idx].add_unit("carro", 0)
+                
+                # Unità iniziali - IA ha PIÙ UNITÀ (difficoltà aumentata)
+                if faction == self.human_faction:  # Giocatore umano
+                    # Giocatore: unità normali
+                    for _ in range(random.randint(2, 4)):
+                        self.territories[idx].add_unit("fanteria", 0)
+                    for _ in range(random.randint(0, 2)):
+                        self.territories[idx].add_unit("carro", 0)
+                else:  # IA (nemici)
+                    # IA: MOLTE PIÙ UNITÀ (difficoltà alta)
+                    for _ in range(random.randint(4, 6)):  # Era 2-4, ora 4-6
+                        self.territories[idx].add_unit("fanteria", 0)
+                    for _ in range(random.randint(1, 3)):  # Era 0-2, ora 1-3
+                        self.territories[idx].add_unit("carro", 0)
+                    # IA inizia anche con alcuni aerei!
+                    if random.random() < 0.3:  # 30% chance di avere un aereo
+                        self.territories[idx].add_unit("aereo", 0)
     
     def next_turn(self):
         """Prossimo turno con CRESCITA TERRITORI"""
@@ -1673,51 +1691,72 @@ class Game:
         self.missile_animations.append(MissileAnimation((attacker.x, attacker.y), (defender.x, defender.y)))
     
     def ai_turn(self):
-        """Turno dell'IA"""
+        """Turno dell'IA - DIFFICOLTÀ AUMENTATA"""
         print(f"\n[IA] Turno {FACTIONS[self.current_faction]['name']}")
         
-        # 1. COMPRA UNITÀ
+        # 1. BONUS RISORSE IA (più difficile)
+        FACTIONS[self.current_faction]["money"] += 500  # Bonus extra
+        FACTIONS[self.current_faction]["oil"] += 200    # Petrolio extra
+        
+        # 2. COMPRA UNITÀ - PIÙ AGGRESSIVO
         my_territories = [t for t in self.territories if t.owner == self.current_faction]
         money = FACTIONS[self.current_faction]["money"]
         
-        for terr in my_territories[:3]:  # Solo primi 3 territori
-            if money >= 3000:  # Compra bombardiere se molto ricco!
+        # Compra in TUTTI i territori principali (non solo 3)
+        for terr in my_territories[:7]:  # Primi 7 territori invece di 3
+            if money >= 3000:  # Compra bombardiere
                 terr.add_unit("bombardiere", self.turn)
                 money -= 3000
                 self.show_message(f"[IA] {terr.name}: Comprato Bombardiere")
-            elif money >= 1500:  # Compra aereo se ricco
+            elif money >= 1500:  # Compra aereo
                 terr.add_unit("aereo", self.turn)
                 money -= 1500
                 self.show_message(f"[IA] {terr.name}: Comprato Aereo")
-            elif money >= 500:  # Altrimenti carro
+            elif money >= 500:  # Compra carro
                 terr.add_unit("carro", self.turn)
                 money -= 500
                 self.show_message(f"[IA] {terr.name}: Comprato Carro")
-            elif money >= 50:  # O fanteria
+            elif money >= 50:  # Compra fanteria
+                terr.add_unit("fanteria", self.turn)
+                money -= 50
+        
+        # Compra anche difese nei territori deboli
+        weak_territories = [t for t in my_territories if len(t.units) < 3]
+        for terr in weak_territories[:5]:
+            if money >= 50:
                 terr.add_unit("fanteria", self.turn)
                 money -= 50
         
         FACTIONS[self.current_faction]["money"] = money
         
-        # 2. ATTACCA territori nemici
-        for terr in my_territories:
-            if len(terr.units) < 2:
+        # 3. ATTACCA MULTIPLI - Più attacchi per turno
+        attacks_made = 0
+        max_attacks = 3  # Fino a 3 attacchi per turno
+        
+        for terr in sorted(my_territories, key=lambda t: len(t.units), reverse=True):
+            if attacks_made >= max_attacks:
+                break
+            
+            if len(terr.units) < 3:  # Attacca solo se hai almeno 3 unità
                 continue
             
-            # Trova nemici vicini (simulato - attacca casualmente)
+            # Trova nemici e ordina per debolezza
             enemies = [t for t in self.territories 
                       if t.owner != self.current_faction and t.owner is not None]
             
-            if enemies and random.random() < 0.3:  # 30% chance attacco
-                target = random.choice(enemies)
+            # Priorità: nemici più deboli
+            enemies.sort(key=lambda t: len(t.units))
+            
+            if enemies and random.random() < 0.65:  # 65% chance attacco (era 30%)
+                target = enemies[0]  # Attacca il più debole
                 
-                # Attacca se superiore
-                if terr.get_total_attack() > target.get_total_defense():
+                # Attacca anche se leggermente inferiore (più aggressivo)
+                if terr.get_total_attack() > target.get_total_defense() * 0.7:
                     self.show_message(f"[IA] Attacco: {terr.name} -> {target.name}")
                     self.attack(terr, target)
-                    break  # Un attacco per turno
+                    attacks_made += 1
         
-        # 3. Fine turno automatico dopo 2 secondi
+        # 4. Fine turno automatico dopo 2 secondi
         pygame.time.set_timer(pygame.USEREVENT + 2, 2000)
     
     def run(self):
