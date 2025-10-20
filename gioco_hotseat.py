@@ -287,7 +287,7 @@ class Game:
         print(f"[INFO] {msg}")
     
     def handle_click(self, pos):
-        """Gestisci click mouse"""
+        """Gestisci click mouse - Trova territorio PIÙ VICINO"""
         # Check menu acquisto
         if self.buy_menu:
             if self.buy_menu.handle_click(pos):
@@ -296,22 +296,29 @@ class Game:
             self.buy_menu = None
             return
         
-        # Selezione territorio
+        # Selezione territorio - Trova il più vicino se sovrapposti
+        closest_territory = None
+        min_distance = float('inf')
+        
         for territory in self.territories:
             dist = math.hypot(pos[0] - territory.x, pos[1] - territory.y)
             if dist <= territory.radius:
-                # Click su territorio
-                if territory.owner == self.get_current_faction():
-                    # Territorio proprio - apri menu
-                    self.selected_territory = territory
-                    from gioco_avanzato import BuyMenu
-                    self.buy_menu = BuyMenu(territory, self.faction_resources[territory.owner])
-                    self.show_message(f"Territorio: {territory.name}")
-                else:
-                    # Territorio nemico - attacca se possibile
-                    if self.selected_territory and self.selected_territory.owner == self.get_current_faction():
-                        self.attack(self.selected_territory, territory)
-                break
+                if dist < min_distance:
+                    min_distance = dist
+                    closest_territory = territory
+        
+        if closest_territory:
+            # Click su territorio più vicino
+            if closest_territory.owner == self.get_current_faction():
+                # Territorio proprio - apri menu
+                self.selected_territory = closest_territory
+                from gioco_avanzato import BuyMenu
+                self.buy_menu = BuyMenu(closest_territory, self.faction_resources[closest_territory.owner])
+                self.show_message(f"Territorio: {closest_territory.name}")
+            else:
+                # Territorio nemico - attacca se possibile
+                if self.selected_territory and self.selected_territory.owner == self.get_current_faction():
+                    self.attack(self.selected_territory, closest_territory)
     
     def attack(self, attacker, defender):
         """Attacca territorio"""

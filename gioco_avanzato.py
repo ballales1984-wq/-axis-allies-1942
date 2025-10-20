@@ -1899,12 +1899,18 @@ class Game:
         sys.exit()
     
     def handle_click(self, pos):
-        """Click handler"""
+        """Click handler - Trova territorio PIÙ VICINO al click"""
         clicked = None
+        min_distance = float('inf')
+        
+        # Trova tutti i territori sotto il click e scegli il più vicino
         for t in self.territories:
             if t.contains_point(pos[0], pos[1]):
-                clicked = t
-                break
+                # Calcola distanza dal centro del territorio
+                distance = math.hypot(pos[0] - t.x, pos[1] - t.y)
+                if distance < min_distance:
+                    min_distance = distance
+                    clicked = t
         
         if not clicked:
             return
