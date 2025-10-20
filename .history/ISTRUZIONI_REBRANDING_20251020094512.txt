@@ -1,0 +1,55 @@
+========================================
+ISTRUZIONI PER COMPLETARE IL REBRANDING
+========================================
+
+RELEASE v1.1:
+-----------
+1. La pagina per creare la release è aperta
+2. Titolo: "GreatWar3 v1.1 - Rebranding Completo"
+3. Descrizione (copia e incolla):
+
+```markdown
+# 🎮 GreatWar3 v1.1 - Rebranding Completo
+
+## 🔄 Modifiche Principali
+- ✅ Rinominato da "Axis & Allies 1942" a "GreatWar3"
+- ✅ Aggiornata tutta la documentazione
+- ✅ Rimossi riferimenti a IP esistente
+- ✅ Nome completamente originale e sicuro
+
+## 🎯 Caratteristiche
+- 5 squadre giocabili (USA, Europa, Russia, Cina, Africa)
+- 82 territori sulla mappa mondiale
+- Sistema di combattimento avanzato con dadi
+- Economia e sistema tecnologico
+- Modalità Hot-Seat e Multiplayer online
+- Grafica migliorata con effetti visivi
+- Commenti vocali durante il gioco
+
+## 🚀 Come Giocare
+1. Installa le dipendenze: `pip install -r requirements.txt`
+2. Avvia il gioco: esegui `AVVIA_GIOCO.bat` o `python gioco_avanzato.py`
+
+## 🛡️ Sicurezza Legale
+Questo gioco è completamente originale e non viola alcun copyright.
+
+Buona guerra strategica! ⚔️🗺️
+```
+
+RINOMINARE REPOSITORY:
+---------------------
+1. La pagina delle impostazioni è aperta
+2. Vai alla sezione "Repository name"
+3. Cambia da "-axis-allies-1942" a "greatwar3"
+4. Clicca "Rename"
+
+AGGIORNAMENTO REMOTE:
+--------------------
+Il remote locale è già aggiornato per puntare al nuovo nome.
+
+VERIFICA FINALE:
+---------------
+Dopo aver rinominato il repository, esegui:
+git push origin main
+
+========================================
