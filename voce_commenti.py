@@ -14,8 +14,11 @@ class VoiceAnnouncer:
             self.engine = pyttsx3.init()
             
             # Configurazione voce
-            self.engine.setProperty('rate', 150)  # Velocità (parole/min)
-            self.engine.setProperty('volume', 0.9)  # Volume (0-1)
+            self.rate = 150  # Velocità (parole/min)
+            self.volume = 0.5  # Volume iniziale (0-1) - Medio
+            
+            self.engine.setProperty('rate', self.rate)
+            self.engine.setProperty('volume', self.volume)
             
             # Prova a impostare voce italiana (se disponibile)
             voices = self.engine.getProperty('voices')
@@ -25,7 +28,7 @@ class VoiceAnnouncer:
                     break
             
             self.enabled = True
-            print("[OK] Sistema vocale attivato")
+            print(f"[OK] Sistema vocale attivato - Volume: {int(self.volume * 100)}%")
         except Exception as e:
             print(f"[WARN] Sistema vocale non disponibile: {e}")
             self.enabled = False
@@ -88,6 +91,56 @@ class VoiceAnnouncer:
         status = "attivati" if self.enabled else "disattivati"
         print(f"[INFO] Commenti vocali {status}")
         return self.enabled
+    
+    def volume_up(self):
+        """Aumenta volume di 10%"""
+        if not hasattr(self, 'engine'):
+            return "Voce non disponibile"
+        
+        self.volume = min(1.0, self.volume + 0.1)
+        self.engine.setProperty('volume', self.volume)
+        percentage = int(self.volume * 100)
+        print(f"[VOCE] Volume: {percentage}%")
+        return f"Volume Voce: {percentage}%"
+    
+    def volume_down(self):
+        """Diminuisce volume di 10%"""
+        if not hasattr(self, 'engine'):
+            return "Voce non disponibile"
+        
+        self.volume = max(0.0, self.volume - 0.1)
+        self.engine.setProperty('volume', self.volume)
+        percentage = int(self.volume * 100)
+        print(f"[VOCE] Volume: {percentage}%")
+        return f"Volume Voce: {percentage}%"
+    
+    def speed_up(self):
+        """Aumenta velocità di 20 parole/min"""
+        if not hasattr(self, 'engine'):
+            return "Voce non disponibile"
+        
+        self.rate = min(250, self.rate + 20)
+        self.engine.setProperty('rate', self.rate)
+        print(f"[VOCE] Velocità: {self.rate} parole/min")
+        return f"Velocità Voce: {self.rate} wpm"
+    
+    def speed_down(self):
+        """Diminuisce velocità di 20 parole/min"""
+        if not hasattr(self, 'engine'):
+            return "Voce non disponibile"
+        
+        self.rate = max(80, self.rate - 20)
+        self.engine.setProperty('rate', self.rate)
+        print(f"[VOCE] Velocità: {self.rate} parole/min")
+        return f"Velocità Voce: {self.rate} wpm"
+    
+    def get_volume(self):
+        """Ottieni volume corrente in percentuale"""
+        return int(self.volume * 100)
+    
+    def get_rate(self):
+        """Ottieni velocità corrente"""
+        return self.rate
     
     def cleanup(self):
         """Pulizia risorse"""

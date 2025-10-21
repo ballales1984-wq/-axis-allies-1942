@@ -31,8 +31,24 @@ Nessun nemico da combattere. Solo tu, una mappa mondiale, e UN puntino grigio na
 
 ## 🚀 Come Avviare
 
+### **Metodo 1: LAUNCHER (Consigliato)**
+```
+Doppio click su: LAUNCHER.bat
+```
+Ti permette di scegliere:
+- 🎮 Singolo (vs IA)
+- 🏠 Hot Seat (stesso PC)
+- 🌐 Multiplayer Server
+- 🌐 Multiplayer Client
+
+### **Metodo 2: Direttamente**
 ```bash
 python gioco_avanzato.py
+```
+
+### **Metodo 3: EXE**
+```
+Doppio click su: GreatWar3 FINALE.lnk (Desktop)
 ```
 
 ## 🎯 Obiettivo del Gioco
@@ -46,8 +62,12 @@ Conquista più territori possibili sconfiggendo le altre squadre!
 | **Click** | Seleziona territorio |
 | **A** | Modalità ATTACCO (poi click su nemico) |
 | **M** | Modalità MOVIMENTO (muovi truppe) |
-| **B** | Compra unità (costa 5 soldi) |
+| **B** | Compra unità |
+| **Q W E T Y U** | Nuove unità speciali (Scienziato, Artiglieria, Drone, Hacker, Robot, Super) |
 | **SPAZIO** | Fine turno (passa alla prossima squadra) |
+| **F11** | Toggle Schermo Intero / Finestra |
+| **+ / -** | Volume voce SU/GIÙ |
+| **V** | On/Off commenti vocali |
 | **ESC** | Esci dal gioco |
 
 ## 📋 Come Si Gioca
@@ -109,14 +129,43 @@ Conquista più territori possibili sconfiggendo le altre squadre!
 - **Colore puntino**: Indica quale squadra controlla il territorio
 - **Numeri**: Mostrano quante unità ci sono nel territorio
 
+## 🌐 Multiplayer Online
+
+### **Giocare con gli Amici:**
+
+**1. Host (Giocatore 1):**
+```
+Doppio click su: AVVIA_SERVER.bat
+→ Condividi il tuo IP con gli amici
+```
+
+**2. Giocatori 2-5:**
+```
+Doppio click su: AVVIA_CLIENT_MULTIPLAYER.bat
+→ Inserisci IP dell'host
+```
+
+**3. Giocate!**
+- Fino a 5 giocatori
+- Turni sincronizzati
+- Ogni giocatore controlla una fazione
+
+📖 **Guida completa**: Vedi `GUIDA_MULTIPLAYER.md`
+
+---
+
 ## 📁 File del Progetto
 
 - `gioco_avanzato.py` - Gioco principale
+- `console_comando.py` - Console di comando migliorata
+- `voce_commenti.py` - Sistema audio con controllo volume
+- `server_multiplayer.py` - Server per gioco online
+- `client_multiplayer.py` - Client multiplayer
 - `centri.json` - Dati dei territori (posizioni, nomi)
 - `mappa_hd.jpg` - Mappa mondiale ad alta definizione
 - `mappa_bn.jpg` - Mappa in bianco e nero (usata come sfondo)
-- `menu_principale.py` - Menu di avvio del gioco
-- `server_multiplayer.py` - Server per gioco online
+- `LAUNCHER.bat` - Launcher principale
+- `GreatWar3_FINALE.exe` - File eseguibile (in dist/)
 
 ## 🛠️ Requisiti
 

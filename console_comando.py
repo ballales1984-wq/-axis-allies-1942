@@ -23,6 +23,11 @@ class CommandConsole:
         
         self.active = True
         
+        # DRAG & DROP - Finestra mobile
+        self.dragging = False
+        self.drag_offset_x = 0
+        self.drag_offset_y = 0
+        
         # Calcola statistiche
         self.calculate_stats()
     
@@ -33,16 +38,30 @@ class CommandConsole:
         # Conta territori
         self.territory_count = len(self.my_territories)
         
-        # Conta unità totali
+        # Conta unità totali - TUTTE LE NUOVE UNITÀ
         self.total_infantry = 0
         self.total_tanks = 0
         self.total_planes = 0
+        self.total_bombers = 0
+        self.total_scientists = 0
+        self.total_artillery = 0
+        self.total_drones = 0
+        self.total_hackers = 0
+        self.total_robots = 0
+        self.total_super = 0
         
         for t in self.my_territories:
             counts = t.count_units_by_type()
             self.total_infantry += counts["fanteria"]
             self.total_tanks += counts["carro"]
             self.total_planes += counts["aereo"]
+            self.total_bombers += counts["bombardiere"]
+            self.total_scientists += counts["scienziato"]
+            self.total_artillery += counts["artiglieria"]
+            self.total_drones += counts["drone"]
+            self.total_hackers += counts["hacker"]
+            self.total_robots += counts["robot"]
+            self.total_super += counts["supersoldato"]
         
         # Risorse totali
         self.money = self.factions_data[self.faction]["money"]
@@ -53,6 +72,9 @@ class CommandConsole:
         self.income_total = sum(t.income for t in self.my_territories)
         self.oil_total = sum(t.oil_production for t in self.my_territories)
         self.tech_total = sum(t.tech_points for t in self.my_territories)
+        
+        # PRODUZIONE TECH DA SCIENZIATI!
+        self.tech_from_scientists = self.total_scientists * 10
         
         # Livello tech
         tech_level_idx = 0
@@ -99,10 +121,15 @@ class CommandConsole:
         pygame.draw.rect(shadow, (0, 0, 0, 100), (10, 10, self.width, self.height))
         surface.blit(shadow, (self.x - 10, self.y - 10))
         
-        # Bordo doppio elegante con glow
-        pygame.draw.rect(surface, (150, 200, 255), (self.x - 2, self.y - 2, self.width + 4, self.height + 4), 6)
-        pygame.draw.rect(surface, (100, 150, 255), (self.x, self.y, self.width, self.height), 4)
-        pygame.draw.rect(surface, (50, 100, 200), (self.x + 4, self.y + 4, self.width - 8, self.height - 8), 2)
+        # Bordo doppio elegante con glow - COLORE CAMBIA SE TRASCINAMENTO ATTIVO
+        if self.dragging:
+            pygame.draw.rect(surface, (100, 255, 150), (self.x - 2, self.y - 2, self.width + 4, self.height + 4), 6)
+            pygame.draw.rect(surface, (50, 200, 100), (self.x, self.y, self.width, self.height), 4)
+            pygame.draw.rect(surface, (25, 150, 75), (self.x + 4, self.y + 4, self.width - 8, self.height - 8), 2)
+        else:
+            pygame.draw.rect(surface, (150, 200, 255), (self.x - 2, self.y - 2, self.width + 4, self.height + 4), 6)
+            pygame.draw.rect(surface, (100, 150, 255), (self.x, self.y, self.width, self.height), 4)
+            pygame.draw.rect(surface, (50, 100, 200), (self.x + 4, self.y + 4, self.width - 8, self.height - 8), 2)
         
         # ===== HEADER CON GRADIENTE =====
         header_height = 80
@@ -123,17 +150,27 @@ class CommandConsole:
                         (self.x, self.y + header_height), 
                         (self.x + self.width, self.y + header_height), 3)
         
-        # Titolo con GLOW
-        title = font_title.render("CONSOLE DI COMANDO", True, (255, 255, 100))
+        # Titolo con GLOW - VERSIONE v2.3 TRASCINABILE
+        title = font_title.render("CONSOLE v2.3 TRASCINABILE", True, (255, 255, 100))
         title_rect = title.get_rect(center=(self.x + self.width // 2, self.y + 25))
         
         # Glow dietro titolo
         for offset in range(3, 0, -1):
-            glow_title = font_title.render("CONSOLE DI COMANDO", True, (255, 200, 0, 100 // offset))
+            glow_title = font_title.render("CONSOLE v2.3 TRASCINABILE", True, (255, 200, 0, 100 // offset))
             glow_rect = glow_title.get_rect(center=(title_rect.centerx + offset, title_rect.centery + offset))
             surface.blit(glow_title, glow_rect)
         
         surface.blit(title, title_rect)
+        
+        # Indicatore DRAG - mostra solo se non sta trascinando
+        if not self.dragging:
+            drag_hint = font_small.render("🖐️ Trascina per spostare", True, (200, 200, 200))
+            drag_rect = drag_hint.get_rect(center=(self.x + self.width // 2, self.y + 10))
+            surface.blit(drag_hint, drag_rect)
+        else:
+            drag_active = font_small.render("✋ Trascinamento attivo", True, (100, 255, 150))
+            drag_rect = drag_active.get_rect(center=(self.x + self.width // 2, self.y + 10))
+            surface.blit(drag_active, drag_rect)
         
         # Sottotitolo con colore fazione
         subtitle = font_large.render(f"{self.factions_data[self.faction]['name']} - TURNO {self.turn}", 
@@ -210,9 +247,28 @@ class CommandConsole:
         surface.blit(oil_inc, (x + 20, y_offset))
         y_offset += 20
         
-        tech_inc = font_small.render(f"+[T] {self.tech_total:,} T", True, (180, 180, 255))
+        tech_inc = font_small.render(f"+[T] {self.tech_total:,} T (territori)", True, (180, 180, 255))
         surface.blit(tech_inc, (x + 20, y_offset))
-        y_offset += 40
+        y_offset += 20
+        
+        # SCIENZIATI - PRODUZIONE TECH!
+        if self.total_scientists > 0:
+            sci_tech = font_small.render(f"+[T] {self.tech_from_scientists:,} T (🔬x{self.total_scientists})", True, (100, 255, 255))
+            surface.blit(sci_tech, (x + 20, y_offset))
+            y_offset += 20
+            
+            # Totale tech
+            total_tech_prod = self.tech_total + self.tech_from_scientists
+            total_text = font.render(f"TOTALE: +{total_tech_prod:,} T/turno", True, (255, 255, 100))
+            surface.blit(total_text, (x + 20, y_offset))
+            y_offset += 30
+        else:
+            # Suggerimento per comprare scienziati
+            no_sci = font_small.render("💡 Compra Scienziati (Q) per +tech!", True, (255, 200, 100))
+            surface.blit(no_sci, (x + 20, y_offset))
+            y_offset += 30
+        
+        y_offset += 10
         
         # Livello tecnologia
         pygame.draw.line(surface, (100, 100, 150), (x + 15, y_offset), (x + 295, y_offset), 1)
@@ -231,9 +287,9 @@ class CommandConsole:
             True, (200, 255, 200)
         )
         surface.blit(bonus_text, (x + 20, y_offset))
-        y_offset += 30
+        y_offset += 25
         
-        # Prossimo upgrade
+        # BARRA DI PROGRESSO TECNOLOGICO
         next_lvl = None
         for lvl in self.tech_levels:
             if lvl["points"] > self.tech:
@@ -241,14 +297,53 @@ class CommandConsole:
                 break
         
         if next_lvl:
+            # Calcola progresso
+            current_lvl_points = self.tech_level["points"]
+            next_lvl_points = next_lvl["points"]
+            progress = (self.tech - current_lvl_points) / (next_lvl_points - current_lvl_points)
+            progress = max(0, min(1, progress))
+            
+            # Disegna barra
+            bar_width = 270
+            bar_height = 20
+            bar_x = x + 20
+            bar_y = y_offset
+            
+            # Sfondo barra
+            pygame.draw.rect(surface, (40, 40, 60), (bar_x, bar_y, bar_width, bar_height))
+            
+            # Riempimento barra
+            fill_width = int(bar_width * progress)
+            for i in range(bar_height):
+                t = i / bar_height
+                r = int(100 + 155 * progress)
+                g = int(100 + 155 * t)
+                b = int(255 - 100 * t)
+                pygame.draw.line(surface, (r, g, b), (bar_x, bar_y + i), (bar_x + fill_width, bar_y + i))
+            
+            # Bordo barra
+            pygame.draw.rect(surface, (150, 150, 200), (bar_x, bar_y, bar_width, bar_height), 2)
+            
+            # Testo progresso
             needed = next_lvl["points"] - self.tech
+            progress_text = font_small.render(f"{int(progress * 100)}% - {needed}T al prossimo livello", True, (255, 255, 255))
+            surface.blit(progress_text, (bar_x + 5, bar_y + 2))
+            y_offset += 25
+            
+            # Prossimo livello
             next_text = font_small.render(
-                f"Prossimo: {next_lvl['name']} ({needed}T mancanti)",
-                True, (150, 150, 200)
+                f"➜ {next_lvl['name']}",
+                True, (150, 200, 255)
             )
             surface.blit(next_text, (x + 20, y_offset))
+            
+            # Unità sbloccabili
+            if len(next_lvl.get("unlocks", [])) > 0:
+                unlocks = ", ".join(next_lvl["unlocks"])
+                unlock_text = font_small.render(f"Sblocca: {unlocks}", True, (200, 255, 200))
+                surface.blit(unlock_text, (x + 25, y_offset + 15))
         else:
-            max_text = font_small.render("LIVELLO MASSIMO!", True, (255, 215, 0))
+            max_text = font.render("⭐ LIVELLO MASSIMO! ⭐", True, (255, 215, 0))
             surface.blit(max_text, (x + 20, y_offset))
     
     def draw_military_panel(self, surface, font, font_small, x, y):
@@ -274,22 +369,69 @@ class CommandConsole:
         
         y_offset = y + 45
         
-        # Totale unità
-        total = font_small.render("UNITÀ TOTALI:", True, (200, 200, 200))
+        # Totale unità - DIVISO IN SEZIONI
+        total = font_small.render("🎖️ UNITÀ BASE:", True, (200, 200, 200))
         surface.blit(total, (x + 15, y_offset))
+        y_offset += 20
+        
+        inf = font_small.render(f"  👥 {self.total_infantry} Fanterie", True, (200, 255, 200))
+        surface.blit(inf, (x + 20, y_offset))
+        y_offset += 18
+        
+        tank = font_small.render(f"  🚜 {self.total_tanks} Carri", True, (255, 200, 150))
+        surface.blit(tank, (x + 20, y_offset))
+        y_offset += 18
+        
+        plane = font_small.render(f"  ✈️  {self.total_planes} Aerei", True, (150, 200, 255))
+        surface.blit(plane, (x + 20, y_offset))
+        y_offset += 18
+        
+        bomber = font_small.render(f"  💣 {self.total_bombers} Bombardieri", True, (255, 150, 150))
+        surface.blit(bomber, (x + 20, y_offset))
         y_offset += 25
         
-        inf = font.render(f"👥 {self.total_infantry} Fanterie", True, (200, 255, 200))
-        surface.blit(inf, (x + 20, y_offset))
-        y_offset += 30
+        # UNITÀ SPECIALI
+        has_special = (self.total_scientists + self.total_artillery + self.total_drones + 
+                      self.total_hackers + self.total_robots + self.total_super) > 0
         
-        tank = font.render(f"🚜 {self.total_tanks} Carri", True, (255, 200, 150))
-        surface.blit(tank, (x + 20, y_offset))
-        y_offset += 30
-        
-        plane = font.render(f"✈️ {self.total_planes} Aerei", True, (150, 200, 255))
-        surface.blit(plane, (x + 20, y_offset))
-        y_offset += 40
+        if has_special:
+            special = font_small.render("⭐ UNITÀ SPECIALI:", True, (255, 255, 100))
+            surface.blit(special, (x + 15, y_offset))
+            y_offset += 20
+            
+            if self.total_scientists > 0:
+                sci = font_small.render(f"  🔬 {self.total_scientists} Scienziati (+{self.total_scientists * 10}T/turno)", True, (100, 255, 255))
+                surface.blit(sci, (x + 20, y_offset))
+                y_offset += 18
+            
+            if self.total_artillery > 0:
+                art = font_small.render(f"  🎯 {self.total_artillery} Artiglieria", True, (255, 200, 100))
+                surface.blit(art, (x + 20, y_offset))
+                y_offset += 18
+            
+            if self.total_drones > 0:
+                drone = font_small.render(f"  🛸 {self.total_drones} Droni", True, (200, 150, 255))
+                surface.blit(drone, (x + 20, y_offset))
+                y_offset += 18
+            
+            if self.total_hackers > 0:
+                hack = font_small.render(f"  💻 {self.total_hackers} Hacker (range globale!)", True, (150, 255, 255))
+                surface.blit(hack, (x + 20, y_offset))
+                y_offset += 18
+            
+            if self.total_robots > 0:
+                robot = font_small.render(f"  🤖 {self.total_robots} Robot", True, (255, 150, 255))
+                surface.blit(robot, (x + 20, y_offset))
+                y_offset += 18
+            
+            if self.total_super > 0:
+                superunit = font.render(f"  ⚡ {self.total_super} SUPER SOLDATI!", True, (255, 255, 0))
+                surface.blit(superunit, (x + 20, y_offset))
+                y_offset += 20
+            
+            y_offset += 10
+        else:
+            y_offset += 15
         
         # Separatore
         pygame.draw.line(surface, (150, 100, 100), (x + 15, y_offset), (x + 295, y_offset), 1)
@@ -418,23 +560,42 @@ class CommandConsole:
         surface.blit(suggestion, (x + 15, y_offset))
         y_offset += 20
         
-        if self.oil < 500:
-            sug = font_small.render("Poco petrolio! Conquista", True, (255, 200, 150))
+        # SUGGERIMENTI INTELLIGENTI BASATI SULLE STATISTICHE
+        if self.total_scientists == 0:
+            sug = font_small.render("🔬 Compra SCIENZIATI!", True, (100, 255, 255))
             surface.blit(sug, (x + 20, y_offset))
             y_offset += 15
-            sug2 = font_small.render("territori petroliferi", True, (255, 200, 150))
+            sug2 = font_small.render("Accelerano la ricerca tech", True, (150, 200, 255))
             surface.blit(sug2, (x + 20, y_offset))
-        elif self.tech < 100:
-            sug = font_small.render("Focus su territori tech", True, (200, 200, 255))
+        elif self.total_scientists < 5 and self.tech < 1000:
+            sug = font_small.render("Serve più ricerca!", True, (255, 255, 100))
             surface.blit(sug, (x + 20, y_offset))
             y_offset += 15
-            sug2 = font_small.render("per upgrade tecnologico!", True, (200, 200, 255))
+            sug2 = font_small.render(f"Compra altri scienziati (hai {self.total_scientists})", True, (200, 255, 200))
+            surface.blit(sug2, (x + 20, y_offset))
+        elif self.oil < 500:
+            sug = font_small.render("⚠️ Poco petrolio!", True, (255, 200, 150))
+            surface.blit(sug, (x + 20, y_offset))
+            y_offset += 15
+            sug2 = font_small.render("Conquista territori petroliferi", True, (255, 200, 150))
+            surface.blit(sug2, (x + 20, y_offset))
+        elif self.tech >= 1200 and self.total_hackers == 0:
+            sug = font_small.render("💻 Sblocca HACKER!", True, (150, 255, 255))
+            surface.blit(sug, (x + 20, y_offset))
+            y_offset += 15
+            sug2 = font_small.render("Range globale - attacca ovunque!", True, (200, 255, 200))
+            surface.blit(sug2, (x + 20, y_offset))
+        elif self.tech >= 3500 and self.total_super == 0:
+            sug = font_small.render("⚡ SUPER SOLDATI disponibili!", True, (255, 255, 0))
+            surface.blit(sug, (x + 20, y_offset))
+            y_offset += 15
+            sug2 = font_small.render("Le unità più potenti del gioco!", True, (255, 215, 0))
             surface.blit(sug2, (x + 20, y_offset))
         else:
-            sug = font_small.render("Buon bilanciamento!", True, (150, 255, 150))
+            sug = font_small.render("✅ Ottima strategia!", True, (150, 255, 150))
             surface.blit(sug, (x + 20, y_offset))
             y_offset += 15
-            sug2 = font_small.render("Espandi impero!", True, (150, 255, 150))
+            sug2 = font_small.render("Continua a espandere l'impero!", True, (150, 255, 150))
             surface.blit(sug2, (x + 20, y_offset))
     
     def draw_footer(self, surface, font, font_small, font_large, y):
@@ -487,8 +648,43 @@ class CommandConsole:
         helper_rect = helper.get_rect(center=(self.x + self.width // 2, footer_y - 15))
         surface.blit(helper, helper_rect)
     
+    def handle_mouse_down(self, pos):
+        """Gestisce mouse down per drag & drop"""
+        # Area di drag = header (primi 80px)
+        header_rect = pygame.Rect(self.x, self.y, self.width, 80)
+        
+        if header_rect.collidepoint(pos):
+            self.dragging = True
+            self.drag_offset_x = pos[0] - self.x
+            self.drag_offset_y = pos[1] - self.y
+            return True
+        return False
+    
+    def handle_mouse_up(self, pos):
+        """Gestisce mouse up"""
+        if self.dragging:
+            self.dragging = False
+            return True
+        return False
+    
+    def handle_mouse_motion(self, pos):
+        """Gestisce movimento mouse durante drag"""
+        if self.dragging:
+            # Calcola nuova posizione
+            new_x = pos[0] - self.drag_offset_x
+            new_y = pos[1] - self.drag_offset_y
+            
+            # Limita ai bordi dello schermo (1400x800)
+            new_x = max(0, min(new_x, 1400 - self.width))
+            new_y = max(0, min(new_y, 800 - self.height))
+            
+            self.x = new_x
+            self.y = new_y
+            return True
+        return False
+    
     def handle_click(self, pos):
-        """Gestisce click"""
+        """Gestisce click sul bottone"""
         if hasattr(self, 'start_button') and self.start_button.collidepoint(pos):
             self.active = False
             return True

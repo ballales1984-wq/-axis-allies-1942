@@ -39,12 +39,18 @@ FACTIONS = {
 
 COLOR_SELECTED = (255, 215, 0)
 
-# LIVELLI TECNOLOGIA
+# LIVELLI TECNOLOGIA ESPANSI - 10 LIVELLI!
 TECH_LEVELS = [
-    {"points": 0, "name": "Base", "bonus_attack": 0, "bonus_defense": 0},
-    {"points": 100, "name": "Avanzato", "bonus_attack": 2, "bonus_defense": 1},
-    {"points": 300, "name": "Moderno", "bonus_attack": 5, "bonus_defense": 3},
-    {"points": 600, "name": "Futuro", "bonus_attack": 10, "bonus_defense": 5}
+    {"points": 0, "name": "Era Primitiva", "bonus_attack": 0, "bonus_defense": 0, "unlocks": []},
+    {"points": 50, "name": "Industriale", "bonus_attack": 1, "bonus_defense": 1, "unlocks": ["scienziato"]},
+    {"points": 150, "name": "Prima Guerra", "bonus_attack": 2, "bonus_defense": 1, "unlocks": ["artiglieria"]},
+    {"points": 300, "name": "Seconda Guerra", "bonus_attack": 3, "bonus_defense": 2, "unlocks": ["carro"]},
+    {"points": 500, "name": "Guerra Fredda", "bonus_attack": 5, "bonus_defense": 3, "unlocks": ["aereo"]},
+    {"points": 800, "name": "Era Moderna", "bonus_attack": 7, "bonus_defense": 4, "unlocks": ["bombardiere", "drone"]},
+    {"points": 1200, "name": "Era Digitale", "bonus_attack": 10, "bonus_defense": 6, "unlocks": ["hacker"]},
+    {"points": 1700, "name": "Era Robotica", "bonus_attack": 13, "bonus_defense": 8, "unlocks": ["robot"]},
+    {"points": 2500, "name": "Era Nucleare", "bonus_attack": 17, "bonus_defense": 10, "unlocks": ["nuke"]},
+    {"points": 3500, "name": "Era Futuristica", "bonus_attack": 25, "bonus_defense": 15, "unlocks": ["supersoldato"]}
 ]
 
 # TIPI UNITÀ
@@ -53,6 +59,12 @@ class UnitType:
     CARRO = "carro"
     AEREO = "aereo"
     NUKE = "nuke"
+    SCIENZIATO = "scienziato"
+    ARTIGLIERIA = "artiglieria"
+    DRONE = "drone"
+    HACKER = "hacker"
+    ROBOT = "robot"
+    SUPERSOLDATO = "supersoldato"
 
 # STATISTICHE UNITÀ
 UNIT_STATS = {
@@ -110,6 +122,74 @@ UNIT_STATS = {
         "repair_cost": 0,
         "hp": 1,
         "durability": 1
+    },
+    "scienziato": {
+        "name": "Scienziato",
+        "cost": 300,
+        "repair_cost": 100,
+        "attack": 0,  # NON COMBATTE
+        "defense": 1,  # MOLTO DEBOLE
+        "hp": 5,
+        "durability": 99,  # VIVE A LUNGO
+        "range": 0,  # NON ATTACCA
+        "icon": "🔬",
+        "tech_production": 10  # Produce 10 tech/turno
+    },
+    "artiglieria": {
+        "name": "Artiglieria",
+        "cost": 800,
+        "repair_cost": 300,
+        "attack": 12,
+        "defense": 4,
+        "hp": 35,
+        "durability": 7,
+        "range": 350,  # LUNGO RAGGIO ma meno dell'aereo
+        "icon": "🎯"
+    },
+    "drone": {
+        "name": "Drone",
+        "cost": 2000,
+        "repair_cost": 800,
+        "attack": 18,
+        "defense": 3,
+        "hp": 20,
+        "durability": 5,
+        "range": 600,  # MOLTO LUNGO RAGGIO
+        "icon": "🛸"
+    },
+    "hacker": {
+        "name": "Hacker",
+        "cost": 1200,
+        "repair_cost": 500,
+        "attack": 10,  # ATTACCO CYBER
+        "defense": 2,
+        "hp": 10,
+        "durability": 10,
+        "range": 9999,  # ATTACCO GLOBALE via internet
+        "icon": "💻",
+        "cyber_attack": True  # Può rubare risorse
+    },
+    "robot": {
+        "name": "Robot Militare",
+        "cost": 3500,
+        "repair_cost": 1500,
+        "attack": 30,
+        "defense": 20,
+        "hp": 80,
+        "durability": 8,
+        "range": 300,
+        "icon": "🤖"
+    },
+    "supersoldato": {
+        "name": "Super Soldato",
+        "cost": 5000,
+        "repair_cost": 2000,
+        "attack": 40,
+        "defense": 25,
+        "hp": 100,
+        "durability": 10,
+        "range": 400,
+        "icon": "⚡"
     }
 }
 
@@ -236,8 +316,12 @@ class Territory:
         return defense_with_tech + structural_defense
     
     def count_units_by_type(self):
-        """Conta unità per tipo"""
-        counts = {"fanteria": 0, "carro": 0, "aereo": 0, "bombardiere": 0}
+        """Conta unità per tipo - TUTTE LE NUOVE UNITÀ"""
+        counts = {
+            "fanteria": 0, "carro": 0, "aereo": 0, "bombardiere": 0,
+            "scienziato": 0, "artiglieria": 0, "drone": 0, 
+            "hacker": 0, "robot": 0, "supersoldato": 0
+        }
         for u in self.units:
             if u.type in counts:
                 counts[u.type] += 1
@@ -331,9 +415,9 @@ class BuyMenu:
         self.active = True
         self.selected_item = None
         
-        # Posizione menu - BARRA ORIZZONTALE IN BASSO
+        # Posizione menu - BARRA ORIZZONTALE IN BASSO - ESTESO PER NUOVE UNITÀ
         self.width = 1360  # Molto largo
-        self.height = 180  # Basso
+        self.height = 240  # Aumentato per 2 righe di bottoni
         self.x = (SCREEN_WIDTH - self.width) // 2  # Centrato
         self.y = SCREEN_HEIGHT - self.height - 10  # In basso
         
@@ -370,11 +454,16 @@ class BuyMenu:
         dev_text = font_small.render(f"Sviluppo: {self.territory.development_level}/10", True, (255, 215, 0))
         surface.blit(dev_text, (x1, self.y + 30))
         
-        # Unità presenti
+        # Unità presenti - TUTTE LE UNITÀ
         counts = self.territory.count_units_by_type()
         units_line = f"F:{counts['fanteria']} C:{counts['carro']} A:{counts['aereo']} B:{counts['bombardiere']}"
         units_text = font_small.render(units_line, True, (200, 255, 200))
         surface.blit(units_text, (x1, self.y + 50))
+        
+        # Nuove unità (riga 2)
+        units_line2 = f"🔬:{counts['scienziato']} 🎯:{counts['artiglieria']} 🛸:{counts['drone']}"
+        units_text2 = font_small.render(units_line2, True, (150, 255, 255))
+        surface.blit(units_text2, (x1, self.y + 65))
         
         # Risorse
         money = FACTIONS[self.faction]["money"]
@@ -435,12 +524,40 @@ class BuyMenu:
         self.draw_buy_button_compact(surface, font_small, "bombardiere", UNIT_STATS["bombardiere"], 
                                      x2 + btn_spacing * 3, btn_y, btn_width, btn_height, 4)
         
-        # Ripara (sotto)
+        # RIGA 2: NUOVE UNITÀ SPECIALI
         btn_y2 = self.y + 110
-        self.draw_repair_button_compact(surface, font_small, x2, btn_y2, btn_width, 50)
+        btn_spacing_small = 90  # Bottoni più stretti per inserirne 6
+        btn_width_small = 85
+        btn_height_small = 55
         
-        # Nuke (sotto)
-        self.draw_nuke_button_compact(surface, font_small, x2 + btn_spacing, btn_y2, btn_width * 2, 50)
+        # Scienziato (Q)
+        self.draw_buy_button_compact(surface, font_small, "scienziato", UNIT_STATS["scienziato"], 
+                                     x2, btn_y2, btn_width_small, btn_height_small, 'Q')
+        
+        # Artiglieria (W)
+        self.draw_buy_button_compact(surface, font_small, "artiglieria", UNIT_STATS["artiglieria"], 
+                                     x2 + btn_spacing_small, btn_y2, btn_width_small, btn_height_small, 'W')
+        
+        # Drone (E)
+        self.draw_buy_button_compact(surface, font_small, "drone", UNIT_STATS["drone"], 
+                                     x2 + btn_spacing_small * 2, btn_y2, btn_width_small, btn_height_small, 'E')
+        
+        # Hacker (T)
+        self.draw_buy_button_compact(surface, font_small, "hacker", UNIT_STATS["hacker"], 
+                                     x2 + btn_spacing_small * 3, btn_y2, btn_width_small, btn_height_small, 'T')
+        
+        # Robot (Y)
+        self.draw_buy_button_compact(surface, font_small, "robot", UNIT_STATS["robot"], 
+                                     x2 + btn_spacing_small * 4, btn_y2, btn_width_small, btn_height_small, 'Y')
+        
+        # Super Soldato (U)
+        self.draw_buy_button_compact(surface, font_small, "supersoldato", UNIT_STATS["supersoldato"], 
+                                     x2 + btn_spacing_small * 5, btn_y2, btn_width_small, btn_height_small, 'U')
+        
+        # RIGA 3: Ripara e Nuke
+        btn_y3 = self.y + 175
+        self.draw_repair_button_compact(surface, font_small, x2, btn_y3, btn_width, 50)
+        self.draw_nuke_button_compact(surface, font_small, x2 + btn_spacing, btn_y3, btn_width * 2, 50)
         
         # Separatore verticale 2
         pygame.draw.line(surface, (100, 150, 200), 
@@ -462,10 +579,10 @@ class BuyMenu:
         self.draw_defense_button_compact(surface, font_small, "tower", 5000, 10, x3, def_y + def_spacing, 6)
         self.draw_defense_button_compact(surface, font_small, "fortress", 15000, 30, x3, def_y + def_spacing * 2, 7)
         
-        # Help in basso
-        help_text = font_small.render("1-4: Unita | 5-7: Difese | R: Ripara | N: Nuke | ESC: Chiudi", 
+        # Help in basso - AGGIORNATO CON NUOVE UNITÀ
+        help_text = font_small.render("1-4:Base | Q:Scienziato W:Artig E:Drone T:Hacker Y:Robot U:Super | 5-7:Difese | R:Ripara N:Nuke", 
                                      True, (150, 150, 200))
-        surface.blit(help_text, (self.x + 20, self.y + self.height - 18))
+        surface.blit(help_text, (self.x + 10, self.y + self.height - 18))
     
     def draw_unit_icon(self, surface, unit_type, x, y, size=40):
         """Disegna icona stilizzata dell'unità"""
@@ -531,7 +648,7 @@ class BuyMenu:
             # Cockpit
             pygame.draw.circle(surface, (150, 200, 255), (x + size//2, y + size//3), size//8)
         
-        else:  # bombardiere
+        elif unit_type == "bombardiere":
             # BOMBARDIERE (più grande e pesante)
             # Fusoliera principale (più larga)
             pygame.draw.rect(surface, (90, 90, 90), 
@@ -559,9 +676,129 @@ class BuyMenu:
                               (x + size//2.5, y + size//2.2, size//8, size//5))
             pygame.draw.ellipse(surface, (200, 50, 50), 
                               (x + size*3//5, y + size//2.2, size//8, size//5))
+        
+        elif unit_type == "scienziato":
+            # SCIENZIATO - Omino con camice e provetta
+            # Testa
+            pygame.draw.circle(surface, (255, 220, 180), (x + size//2, y + size//5), size//6)
+            # Occhiali
+            pygame.draw.circle(surface, (200, 200, 255), (x + size//2 - size//10, y + size//5), size//12, 2)
+            pygame.draw.circle(surface, (200, 200, 255), (x + size//2 + size//10, y + size//5), size//12, 2)
+            # Camice bianco
+            pygame.draw.rect(surface, (240, 240, 255), 
+                           (x + size//3, y + int(size/2.5), size//3, size//2))
+            # Braccia
+            pygame.draw.line(surface, (240, 240, 255), 
+                           (x + size//4, y + size//2), (x + size*3//4, y + size//2), 4)
+            # Provetta (mano sinistra)
+            pygame.draw.rect(surface, (100, 255, 255), 
+                           (x + size//5, y + size//2.5, size//8, size//4))
+            pygame.draw.circle(surface, (100, 255, 255), (x + size//5 + size//16, y + size//2.5), size//16)
+        
+        elif unit_type == "artiglieria":
+            # ARTIGLIERIA - Cannone con ruote
+            # Ruote
+            pygame.draw.circle(surface, (100, 80, 60), (x + size//4, y + size*3//4), size//6)
+            pygame.draw.circle(surface, (100, 80, 60), (x + size*3//4, y + size*3//4), size//6)
+            # Base
+            pygame.draw.rect(surface, (120, 100, 80), 
+                           (x + size//4, y + size//2, size//2, size//5))
+            # Cannone
+            pygame.draw.rect(surface, (80, 60, 50), 
+                           (x + size//2, y + size//3, size//2, size//8))
+            # Bocca fuoco (rosso)
+            pygame.draw.circle(surface, (255, 100, 50), (x + size, y + size//3 + size//16), size//12)
+        
+        elif unit_type == "drone":
+            # DRONE - Quadricottero futuristico
+            # Corpo centrale
+            pygame.draw.circle(surface, (200, 200, 220), (x + size//2, y + size//2), size//5)
+            pygame.draw.circle(surface, (255, 50, 50), (x + size//2, y + size//2), size//8)  # LED rosso
+            # Bracci
+            pygame.draw.line(surface, (150, 150, 170), (x + size//4, y + size//4), (x + size//2, y + size//2), 3)
+            pygame.draw.line(surface, (150, 150, 170), (x + size*3//4, y + size//4), (x + size//2, y + size//2), 3)
+            pygame.draw.line(surface, (150, 150, 170), (x + size//4, y + size*3//4), (x + size//2, y + size//2), 3)
+            pygame.draw.line(surface, (150, 150, 170), (x + size*3//4, y + size*3//4), (x + size//2, y + size//2), 3)
+            # Eliche (cerchi ai 4 angoli)
+            for pos in [(size//4, size//4), (size*3//4, size//4), (size//4, size*3//4), (size*3//4, size*3//4)]:
+                pygame.draw.circle(surface, (100, 150, 200), (x + pos[0], y + pos[1]), size//8)
+                pygame.draw.circle(surface, (150, 200, 255), (x + pos[0], y + pos[1]), size//12)
+        
+        elif unit_type == "hacker":
+            # HACKER - Computer portatile
+            # Base del laptop
+            pygame.draw.rect(surface, (50, 50, 60), 
+                           (x + size//6, y + size//2, size*2//3, size//3))
+            # Schermo
+            pygame.draw.rect(surface, (30, 30, 40), 
+                           (x + size//5, y + size//6, size*3//5, size//2.5))
+            # Schermo attivo (verde matrix)
+            pygame.draw.rect(surface, (0, 255, 100), 
+                           (x + size//4, y + size//4, size//2, size//3))
+            # Codice (linee verdi)
+            for i in range(3):
+                pygame.draw.line(surface, (0, 200, 80), 
+                               (x + size//3, y + size//3 + i*size//10), 
+                               (x + size*2//3, y + size//3 + i*size//10), 1)
+            # Warning symbol (skull cyber)
+            pygame.draw.circle(surface, (255, 50, 50), (x + size*3//4, y + size//4), size//10)
+        
+        elif unit_type == "robot":
+            # ROBOT MILITARE - Umanoide corazzato
+            # Testa robotica
+            pygame.draw.rect(surface, (180, 180, 200), 
+                           (x + size//3, y + size//8, size//3, size//4))
+            # Occhi LED rossi
+            pygame.draw.circle(surface, (255, 50, 50), (x + size//2.5, y + size//5), size//12)
+            pygame.draw.circle(surface, (255, 50, 50), (x + size*3//5, y + size//5), size//12)
+            # Antenna
+            pygame.draw.line(surface, (255, 255, 100), 
+                           (x + size//2, y + size//8), (x + size//2, y), 2)
+            pygame.draw.circle(surface, (255, 255, 100), (x + size//2, y), size//15)
+            # Corpo corazzato
+            pygame.draw.rect(surface, (150, 150, 180), 
+                           (x + size//3, y + size//2.5, size//3, size//2))
+            # Braccia (spesse)
+            pygame.draw.rect(surface, (130, 130, 160), 
+                           (x + size//6, y + size//2, size//8, size//2.5))
+            pygame.draw.rect(surface, (130, 130, 160), 
+                           (x + size*2//3, y + size//2, size//8, size//2.5))
+            # Arma integrata (braccio destro)
+            pygame.draw.rect(surface, (255, 100, 50), 
+                           (x + size*2//3, y + size*3//5, size//6, size//10))
+        
+        elif unit_type == "supersoldato":
+            # SUPER SOLDATO - Elite con armatura potenziata
+            # Casco high-tech
+            pygame.draw.circle(surface, (255, 215, 0), (x + size//2, y + size//5), size//5)
+            # Visore (cyan brillante)
+            pygame.draw.rect(surface, (0, 255, 255), 
+                           (x + size//3, y + size//5, size//3, size//12))
+            # Armatura dorata
+            pygame.draw.rect(surface, (255, 215, 0), 
+                           (x + size//3, y + size//2.5, size//3, size//2))
+            # Spalle potenziate
+            pygame.draw.circle(surface, (255, 200, 0), (x + size//4, y + size//2.5), size//8)
+            pygame.draw.circle(surface, (255, 200, 0), (x + size*3//4, y + size//2.5), size//8)
+            # Braccia potenti
+            pygame.draw.rect(surface, (200, 180, 0), 
+                           (x + size//6, y + size//2, size//6, size//2.5))
+            pygame.draw.rect(surface, (200, 180, 0), 
+                           (x + size*2//3, y + size//2, size//6, size//2.5))
+            # Arma al plasma (viola brillante)
+            pygame.draw.rect(surface, (200, 50, 255), 
+                           (x + size*3//4, y + size*3//5, size//4, size//8))
+            pygame.draw.circle(surface, (255, 100, 255), (x + size, y + size*3//5 + size//16), size//12)
+            # Effetto energia (cerchi concentrici gialli)
+            pygame.draw.circle(surface, (255, 255, 100), (x + size//2, y + size*3//4), size//8, 2)
+            pygame.draw.circle(surface, (255, 255, 150), (x + size//2, y + size*3//4), size//12, 1)
+        
+        else:
+            # Fallback - emoji o testo
+            pass
     
     def draw_buy_button_compact(self, surface, font_small, unit_type, stats, x, y, w, h, key_num):
-        """Bottone COMPATTO per layout orizzontale"""
+        """Bottone COMPATTO con icone MIGLIORATE"""
         # Check mouse hover
         mouse_pos = pygame.mouse.get_pos()
         is_hover = (x <= mouse_pos[0] <= x + w and y <= mouse_pos[1] <= y + h)
@@ -571,25 +808,106 @@ class BuyMenu:
             self.buttons = []
         self.buttons.append({"rect": pygame.Rect(x, y, w, h), "type": unit_type})
         
-        # Colore sfondo
-        bg_color = (50, 80, 50) if is_hover else (40, 60, 40)
-        pygame.draw.rect(surface, bg_color, (x, y, w, h))
-        pygame.draw.rect(surface, (100, 255, 100) if is_hover else (80, 180, 80), (x, y, w, h), 2)
+        # SFONDO COLORATO PER TIPO UNITÀ
+        if unit_type == "scienziato":
+            bg_color = (40, 80, 100) if is_hover else (30, 60, 80)
+            border_color = (100, 255, 255) if is_hover else (80, 200, 200)
+        elif unit_type in ["artiglieria", "carro"]:
+            bg_color = (80, 60, 40) if is_hover else (60, 45, 30)
+            border_color = (255, 200, 100) if is_hover else (200, 150, 80)
+        elif unit_type in ["drone", "aereo"]:
+            bg_color = (40, 60, 90) if is_hover else (30, 45, 70)
+            border_color = (150, 200, 255) if is_hover else (100, 150, 200)
+        elif unit_type == "hacker":
+            bg_color = (30, 70, 50) if is_hover else (20, 50, 35)
+            border_color = (100, 255, 150) if is_hover else (70, 200, 100)
+        elif unit_type == "robot":
+            bg_color = (70, 50, 80) if is_hover else (50, 35, 60)
+            border_color = (200, 150, 255) if is_hover else (150, 100, 200)
+        elif unit_type == "supersoldato":
+            bg_color = (100, 80, 20) if is_hover else (70, 60, 15)
+            border_color = (255, 215, 0) if is_hover else (200, 170, 0)
+        else:
+            bg_color = (50, 80, 50) if is_hover else (40, 60, 40)
+            border_color = (100, 255, 100) if is_hover else (80, 180, 80)
         
-        # Icona piccola
-        icon_size = 25
-        self.draw_unit_icon(surface, unit_type, x + 5, y + 5, icon_size)
+        # Gradiente sfondo
+        for i in range(h):
+            t = i / h
+            r = int(bg_color[0] * (1 + 0.3 * t))
+            g = int(bg_color[1] * (1 + 0.3 * t))
+            b = int(bg_color[2] * (1 + 0.3 * t))
+            pygame.draw.line(surface, (r, g, b), (x, y + i), (x + w, y + i))
         
-        # Nome e costo
-        name_text = font_small.render(f"[{key_num}]", True, (255, 255, 255))
-        surface.blit(name_text, (x + 5, y + h - 35))
+        # Bordo con spessore se hover
+        border_width = 3 if is_hover else 2
+        pygame.draw.rect(surface, border_color, (x, y, w, h), border_width)
         
-        cost_text = font_small.render(f"${stats['cost']}", True, (255, 255, 100))
-        surface.blit(cost_text, (x + 5, y + h - 18))
+        # BOX ICONA con sfondo scuro
+        icon_box_size = 35
+        icon_box_x = x + 5
+        icon_box_y = y + 5
+        pygame.draw.rect(surface, (20, 20, 30), (icon_box_x, icon_box_y, icon_box_size, icon_box_size))
+        pygame.draw.rect(surface, border_color, (icon_box_x, icon_box_y, icon_box_size, icon_box_size), 1)
         
-        # Stats ATT/DEF
-        stat_text = font_small.render(f"{stats['attack']}/{stats['defense']}", True, (200, 200, 200))
-        surface.blit(stat_text, (x + w - 30, y + h - 18))
+        # Icona MIGLIORATA - PIÙ GRANDE
+        icon_size = 30
+        self.draw_unit_icon(surface, unit_type, icon_box_x + 2, icon_box_y + 2, icon_size)
+        
+        # Nome unità
+        name = stats.get('name', unit_type.capitalize())
+        name_short = name[:8] if len(name) > 8 else name
+        name_text = font_small.render(name_short, True, (255, 255, 255))
+        surface.blit(name_text, (x + 45, y + 5))
+        
+        # Tasto
+        key_text = font_small.render(f"[{key_num}]", True, (255, 255, 100))
+        surface.blit(key_text, (x + 45, y + 20))
+        
+        # Costo
+        cost_text = font_small.render(f"${stats['cost']}", True, (100, 255, 100))
+        surface.blit(cost_text, (x + 5, y + h - 16))
+        
+        # CONTROLLO TECNOLOGIA - mostra se sbloccata
+        tech_points = FACTIONS[self.faction]["tech"]
+        is_unlocked = (unit_type == "fanteria")  # Fanteria sempre sbloccata
+        required_tech = 0
+        
+        for level in TECH_LEVELS:
+            if unit_type in level.get("unlocks", []):
+                required_tech = level["points"]
+                if tech_points >= required_tech:
+                    is_unlocked = True
+                break
+        
+        # Indicatore LOCK/UNLOCK
+        if not is_unlocked:
+            # Overlay scuro se bloccato
+            lock_overlay = pygame.Surface((w, h))
+            lock_overlay.set_alpha(150)
+            lock_overlay.fill((0, 0, 0))
+            surface.blit(lock_overlay, (x, y))
+            
+            # Simbolo lucchetto
+            lock_text = font_small.render("🔒", True, (255, 100, 100))
+            surface.blit(lock_text, (x + w//2 - 10, y + h//2 - 10))
+            
+            # Tech richiesta
+            req_text = font_small.render(f"{required_tech}T", True, (255, 200, 100))
+            surface.blit(req_text, (x + w//2 - 15, y + h - 16))
+        else:
+            # Stats ATT/DEF - con icone (solo se sbloccato)
+            if stats['attack'] > 0:
+                att_text = font_small.render(f"⚔️{stats['attack']}", True, (255, 150, 150))
+                surface.blit(att_text, (x + w - 60, y + h - 30))
+            
+            def_text = font_small.render(f"🛡️{stats['defense']}", True, (150, 200, 255))
+            surface.blit(def_text, (x + w - 60, y + h - 15))
+            
+            # Badge speciale per scienziato
+            if unit_type == "scienziato":
+                tech_badge = font_small.render("+10T", True, (100, 255, 255))
+                surface.blit(tech_badge, (x + 45, y + 35))
     
     def draw_repair_button_compact(self, surface, font_small, x, y, w, h):
         """Bottone RIPARA compatto"""
@@ -907,6 +1225,18 @@ class BuyMenu:
             return self.buy_unit("aereo")
         elif key == pygame.K_4:
             return self.buy_unit("bombardiere")
+        elif key == pygame.K_q:
+            return self.buy_unit("scienziato")
+        elif key == pygame.K_w:
+            return self.buy_unit("artiglieria")
+        elif key == pygame.K_e:
+            return self.buy_unit("drone")
+        elif key == pygame.K_t:
+            return self.buy_unit("hacker")
+        elif key == pygame.K_y:
+            return self.buy_unit("robot")
+        elif key == pygame.K_u:
+            return self.buy_unit("supersoldato")
         elif key == pygame.K_n:
             return "nuke_mode"  # Modalità lancio nuke
         elif key == pygame.K_r:
@@ -922,7 +1252,31 @@ class BuyMenu:
         return None
     
     def buy_unit(self, unit_type):
-        """Compra unità"""
+        """Compra unità con controllo TECNOLOGIA"""
+        # Controlla se l'unità è sbloccata dal livello tecnologico
+        tech_points = FACTIONS[self.faction]["tech"]
+        unit_unlocked = False
+        required_tech_level = "Era Primitiva"
+        
+        # Verifica se l'unità è disponibile al livello tech attuale
+        for level in TECH_LEVELS:
+            if tech_points >= level["points"]:
+                if unit_type in level["unlocks"] or unit_type == "fanteria":  # Fanteria sempre disponibile
+                    unit_unlocked = True
+                    break
+                # Aggiorna il nome del livello richiesto
+                for future_level in TECH_LEVELS:
+                    if unit_type in future_level["unlocks"]:
+                        required_tech_level = future_level["name"]
+                        break
+        
+        # Fanteria sempre disponibile
+        if unit_type == "fanteria":
+            unit_unlocked = True
+        
+        if not unit_unlocked:
+            return f"Tecnologia insufficiente! Serve: {required_tech_level}"
+        
         cost = UNIT_STATS[unit_type]["cost"]
         if FACTIONS[self.faction]["money"] >= cost:
             FACTIONS[self.faction]["money"] -= cost
@@ -1125,6 +1479,7 @@ class Game:
         oil = 0
         tech = 0
         upgraded_count = 0
+        scientists_count = 0
         
         for t in self.territories:
             if t.owner == self.current_faction:
@@ -1132,6 +1487,12 @@ class Game:
                 income += t.income
                 oil += t.oil_production
                 tech += t.tech_points
+                
+                # SCIENZIATI PRODUCONO TECNOLOGIA!
+                for unit in t.units:
+                    if unit.type == "scienziato":
+                        tech += UNIT_STATS["scienziato"].get("tech_production", 10)
+                        scientists_count += 1
                 
                 # Avanza sviluppo territorio
                 if t.advance_development():
@@ -1145,6 +1506,8 @@ class Game:
         FACTIONS[self.current_faction]["tech"] += tech
         
         msg = f"{FACTIONS[self.current_faction]['name']} +${income} +{oil}P +{tech}T"
+        if scientists_count > 0:
+            msg += f" | {scientists_count}🔬"
         if upgraded_count > 0:
             msg += f" | {upgraded_count} sviluppati!"
         
@@ -1453,19 +1816,26 @@ class Game:
         # CALCOLA DISTANZA
         distance = ((attacker.x - defender.x)**2 + (attacker.y - defender.y)**2) ** 0.5
         
-        # FILTRA unità per PORTATA
+        # FILTRA unità per PORTATA - TUTTE LE UNITÀ!
         units_by_range = {
             "fanteria": [],
             "carro": [],
             "aereo": [],
             "bombardiere": [],
-            "nuke": []
+            "nuke": [],
+            "scienziato": [],
+            "artiglieria": [],
+            "drone": [],
+            "hacker": [],
+            "robot": [],
+            "supersoldato": []
         }
         
         for unit in attacker.units:
-            unit_range = UNIT_STATS[unit.type]["range"]
+            unit_range = UNIT_STATS.get(unit.type, {}).get("range", 0)
             if distance <= unit_range:
-                units_by_range[unit.type].append(unit)
+                if unit.type in units_by_range:
+                    units_by_range[unit.type].append(unit)
         
         # Conta unità che possono attaccare
         total_units = len(attacker.units)
@@ -1479,13 +1849,13 @@ class Game:
                 self.missile_attack(attacker, defender, distance)
                 return
             else:
-                self.show_message(f"FUORI PORTATA! Dist:{int(distance)}px (F:100 C:200 A:500)")
+                self.show_message(f"FUORI PORTATA! Dist:{int(distance)}px (F:100 Art:350 C:200 A:500 D:600 H:∞)")
                 return
         
         # Mostra quali unità partecipano
         if attacking_units < total_units:
             excluded = total_units - attacking_units
-            msg = f"[!] {excluded} unita FUORI PORTATA! (F:100 C:200 A:500)"
+            msg = f"[!] {excluded} unita FUORI PORTATA! (F:100 Art:350 C:200 A:500 D:600 H:∞)"
             print(f"[INFO] {msg}")
             self.show_message(msg)
         
@@ -1866,6 +2236,30 @@ class Game:
                             status = self.voice.toggle()
                             msg = "Commenti ATTIVI" if status else "Commenti DISATTIVATI"
                             self.show_message(msg)
+                        elif event.key == pygame.K_PLUS or event.key == pygame.K_EQUALS or event.key == pygame.K_KP_PLUS:
+                            # AUMENTA VOLUME VOCE
+                            msg = self.voice.volume_up()
+                            self.show_message(msg)
+                        elif event.key == pygame.K_MINUS or event.key == pygame.K_KP_MINUS:
+                            # DIMINUISCI VOLUME VOCE
+                            msg = self.voice.volume_down()
+                            self.show_message(msg)
+                        elif event.key == pygame.K_LEFTBRACKET or event.key == pygame.K_RIGHTBRACKET:
+                            # VELOCITÀ VOCE
+                            if event.key == pygame.K_LEFTBRACKET:
+                                msg = self.voice.speed_down()
+                            else:
+                                msg = self.voice.speed_up()
+                            self.show_message(msg)
+                        elif event.key == pygame.K_F11:
+                            # Toggle FULLSCREEN
+                            self.fullscreen = not self.fullscreen
+                            if self.fullscreen:
+                                self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+                                self.show_message("SCHERMO INTERO ATTIVO (F11 per uscire)")
+                            else:
+                                self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+                                self.show_message("FINESTRA NORMALE (F11 per schermo intero)")
                         elif event.key == pygame.K_s:
                             # SALVA PARTITA (chiudi console prima)
                             if self.command_console:
@@ -1899,10 +2293,13 @@ class Game:
                 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        # Console comando - click su pulsante
+                        # Console comando - check drag o click su pulsante
                         if self.command_console:
-                            if self.command_console.handle_click(event.pos):
-                                self.command_console = None
+                            # Prima controlla se inizia drag
+                            if not self.command_console.handle_mouse_down(event.pos):
+                                # Se non è drag, controlla click sul bottone
+                                if self.command_console.handle_click(event.pos):
+                                    self.command_console = None
                         # Solo se è turno umano
                         elif self.current_faction != self.human_faction:
                             self.show_message("Non e' il tuo turno!")
@@ -1923,10 +2320,19 @@ class Game:
                             self.handle_click(event.pos)
                 
                 elif event.type == pygame.MOUSEBUTTONUP:
-                    if event.button == 1 and self.buy_menu:
-                        self.buy_menu.stop_drag()
+                    if event.button == 1:
+                        # Console comando - ferma drag
+                        if self.command_console:
+                            self.command_console.handle_mouse_up(event.pos)
+                        # Buy menu - ferma drag
+                        if self.buy_menu:
+                            self.buy_menu.stop_drag()
                 
                 elif event.type == pygame.MOUSEMOTION:
+                    # Console comando - aggiorna posizione durante drag
+                    if self.command_console:
+                        self.command_console.handle_mouse_motion(event.pos)
+                    # Buy menu - aggiorna posizione durante drag
                     if self.buy_menu and self.buy_menu.dragging:
                         self.buy_menu.update_position(event.pos[0], event.pos[1])
             
@@ -2306,6 +2712,40 @@ class Game:
             inst = self.font_small.render("Click=Armeria | A=Attacco | N=NUKE | I=Info | SPAZIO=Fine", 
                                          True, (200, 200, 200))
             self.screen.blit(inst, (400, 60))
+        
+        # INDICATORE VOLUME VOCE (angolo in alto a destra)
+        vol_x = SCREEN_WIDTH - 180
+        vol_y = 10
+        
+        # Icona voce
+        voice_icon = "🔊" if self.voice.enabled else "🔇"
+        voice_text = self.font.render(voice_icon, True, (255, 255, 255))
+        self.screen.blit(voice_text, (vol_x, vol_y))
+        
+        # Barra volume
+        if self.voice.enabled:
+            bar_x = vol_x + 30
+            bar_y = vol_y + 8
+            bar_width = 120
+            bar_height = 12
+            
+            # Sfondo barra
+            pygame.draw.rect(self.screen, (40, 40, 60), (bar_x, bar_y, bar_width, bar_height))
+            
+            # Riempimento barra
+            fill_width = int(bar_width * self.voice.volume)
+            pygame.draw.rect(self.screen, (100, 255, 100), (bar_x, bar_y, fill_width, bar_height))
+            
+            # Bordo
+            pygame.draw.rect(self.screen, (150, 150, 200), (bar_x, bar_y, bar_width, bar_height), 1)
+            
+            # Percentuale
+            perc_text = self.font_small.render(f"{int(self.voice.volume * 100)}%", True, (255, 255, 255))
+            self.screen.blit(perc_text, (bar_x + bar_width + 5, bar_y - 2))
+            
+            # Help tasti
+            help_vol = self.font_small.render("+/- Volume", True, (180, 180, 180))
+            self.screen.blit(help_vol, (vol_x + 30, vol_y + 25))
 
 if __name__ == "__main__":
     game = Game()
